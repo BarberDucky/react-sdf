@@ -37,8 +37,9 @@ function createShader(gl: WebGL2RenderingContext, type: GLenum, source: string) 
     return shader
   }
 
+  const errorInfo = gl.getShaderInfoLog(shader)
   gl.deleteShader(shader)
-  throw new Error(`Error while compiling vertex or fragment shader. Full info log: ${gl.getShaderInfoLog(shader)}`)
+  throw new Error(`Error while compiling vertex or fragment shader. Full info log: ${errorInfo}`)
 }
 
 function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) {
@@ -53,8 +54,9 @@ function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fr
     return program
   }
 
+  const errorInfo = gl.getProgramInfoLog(program)
   gl.deleteProgram(program)
-  throw new Error(`Error while linking program. Full info log: ${gl.getProgramInfoLog(program)}`)
+  throw new Error(`Error while linking program. Full info log: ${errorInfo}`)
 }
 
 function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement) {

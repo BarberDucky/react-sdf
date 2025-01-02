@@ -1,25 +1,23 @@
 const vertexSource = `#version 300 es
 
 in vec4 a_position;
-//in vec2 u_resolution;
-
-out vec4 v_color; 
 
 void main() {
   gl_Position = a_position;
-  v_color = gl_Position * 0.5 + 0.5;
 }`
 
 const fragmentSource = `#version 300 es
 
 precision highp float;
- 
-in vec4 v_color;
+
 out vec4 outColor;
+
+uniform vec2 iResolution;
  
 void main() {
-  outColor = vec4(1, 0, 0, 1);
-  outColor = v_color;
+  vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
+
+  outColor = vec4(uv, 0., 1.);
 }`
 
 function createShader(gl: WebGL2RenderingContext, type: GLenum, source: string) {
@@ -91,6 +89,7 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   const program = createProgram(gl, vertexShader, fragmentShader)
 
   const positionAttributeLocation = gl.getAttribLocation(program, 'a_position')
+  const uResolutionLocation = gl.getUniformLocation(program, 'iResolution')
 
   const positionBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -115,16 +114,23 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   const offset = 0
   gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset)
 
-  resizeCanvasToDisplaySize(canvas)
-  gl.viewport(0, 0, canvas.width, canvas.height);
-
-  gl.clearColor(0, 0, 0, 0)
-  gl.clear(gl.COLOR_BUFFER_BIT)
-
   gl.useProgram(program)
 
   gl.bindVertexArray(vao)
 
-  gl.drawArrays(gl.TRIANGLES, 0, 6)
-}
+  const animate = () => {
+    resizeCanvasToDisplaySize(canvas)
+    gl.viewport(0, 0, canvas.width, canvas.height);
 
+    gl.clearColor(0, 0, 0, 0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+
+    gl.uniform2f(uResolutionLocation, canvas.width, canvas.height)
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6)
+
+    window.requestAnimationFrame(animate)
+  }
+
+  animate()
+}

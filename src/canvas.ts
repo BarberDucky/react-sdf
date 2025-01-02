@@ -13,11 +13,34 @@ precision highp float;
 out vec4 outColor;
 
 uniform vec2 iResolution;
- 
+
+float sdSphere( vec3 p, float s )
+{
+  return length(p)-s;
+}
+
 void main() {
   vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
 
-  outColor = vec4(uv, 0., 1.);
+  vec3 ro = vec3(0., 0., -3.);
+  vec3 rd = normalize(vec3(uv, 1.));
+  vec3 col = vec3(0.);
+
+  float t = 0.;
+
+  for (int i = 0; i < 80; i++) {
+    vec3 p = ro + rd * t;
+
+    float d = sdSphere(p, 1.);
+
+    t += d;
+
+    if (d < .001 || t > 100.) break;
+  }
+
+  col = vec3(t * .2);
+
+  outColor = vec4(col, 1.);
 }`
 
 function createShader(gl: WebGL2RenderingContext, type: GLenum, source: string) {

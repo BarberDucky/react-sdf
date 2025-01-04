@@ -19,6 +19,15 @@ float sdSphere( vec3 p, float s )
   return length(p)-s;
 }
 
+float map(vec3 p) {
+  float sphere1 = sdSphere(p, 1.);
+  float sphere2 = sdSphere(p - vec3(1.1, 0., 0.), 1.2);
+
+  float d = min(sphere1, sphere2);
+
+  return d;
+}
+
 void main() {
   vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
 
@@ -31,7 +40,7 @@ void main() {
   for (int i = 0; i < 80; i++) {
     vec3 p = ro + rd * t;
 
-    float d = sdSphere(p, 1.);
+    float d = map(p);
 
     t += d;
 

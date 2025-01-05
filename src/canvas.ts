@@ -13,6 +13,7 @@ precision highp float;
 out vec4 outColor;
 
 uniform vec2 iResolution;
+uniform vec3 iCameraOrigin;
 
 float sdSphere( vec3 p, float s )
 {
@@ -31,7 +32,7 @@ float map(vec3 p) {
 void main() {
   vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
 
-  vec3 ro = vec3(0., 0., -3.);
+  vec3 ro = iCameraOrigin;
   vec3 rd = normalize(vec3(uv, 1.));
   vec3 col = vec3(0.);
 
@@ -122,6 +123,7 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
   const positionAttributeLocation = gl.getAttribLocation(program, 'a_position')
   const uResolutionLocation = gl.getUniformLocation(program, 'iResolution')
+  const uCameraOriginLocation = gl.getUniformLocation(program, 'iCameraOrigin')
 
   const positionBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -150,6 +152,9 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
   gl.bindVertexArray(vao)
 
+  let cameraOrigin: vec3 = [0, 0, -3]
+  const CAMERA_SPEED = 0.05
+
   const animate = () => {
     resizeCanvasToDisplaySize(canvas)
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -157,7 +162,19 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
+    const direction = getCurrentDirectionVector()
+
+    const length = Math.sqrt(direction[0] ** 2 + direction[1] ** 2 + direction[2] ** 2);
+    if (length > 0) {
+      direction[0] /= length;
+      direction[1] /= length;
+      direction[2] /= length;
+    }
+
+    cameraOrigin = cameraOrigin.map((value, index) => value + direction[index] * CAMERA_SPEED) as vec3
+
     gl.uniform2f(uResolutionLocation, canvas.width, canvas.height)
+    gl.uniform3f(uCameraOriginLocation, cameraOrigin[0], cameraOrigin[1], cameraOrigin[2])
 
     gl.drawArrays(gl.TRIANGLES, 0, 6)
 
@@ -165,4 +182,95 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   }
 
   animate()
+}
+
+type Movements =
+  'Forward' |
+  'Backward' |
+  'Left' |
+  'Right' |
+  'Up' |
+  'Down'
+
+const KEY_TO_MOVEMENT_MAP: Record<string, Movements | undefined> = {
+  ['w']: 'Forward',
+  ['W']: 'Forward',
+  ['ArrowUp']: 'Forward',
+
+  ['s']: 'Backward',
+  ['S']: 'Backward',
+  ['ArrowDown']: 'Backward',
+
+  ['a']: 'Left',
+  ['A']: 'Left',
+  ['ArrowLeft']: 'Left',
+
+  ['d']: 'Right',
+  ['D']: 'Right',
+  ['ArrowRight']: 'Right',
+
+  [' ']: 'Up',
+
+  ['Shift']: 'Down',
+}
+
+type vec3 = [number, number, number]
+
+const MOVEMENT_TO_VECTOR_MAP: Record<Movements, vec3> = {
+  ['Forward']: [0, 0, 1],
+  ['Backward']: [0, 0, -1],
+  ['Left']: [-1, 0, 0],
+  ['Right']: [1, 0, 0],
+  ['Up']: [0, 1, 0],
+  ['Down']: [0, -1, 0],
+}
+
+let activeMovements: Record<Movements, boolean> = {
+  ['Forward']: false,
+  ['Backward']: false,
+  ['Left']: false,
+  ['Right']: false,
+  ['Up']: false,
+  ['Down']: false,
+}
+
+document.addEventListener('keydown', e => {
+  const pressedKey = KEY_TO_MOVEMENT_MAP[e.key]
+
+  if (pressedKey == null) { return }
+
+  activeMovements[pressedKey] = true
+})
+
+document.addEventListener('keyup', e => {
+  const pressedKey = KEY_TO_MOVEMENT_MAP[e.key]
+
+  if (pressedKey == null) { return }
+
+  activeMovements[pressedKey] = false
+})
+
+window.addEventListener('blur', () => {
+  for (let movement in activeMovements) {
+    activeMovements[movement as Movements] = false
+  }
+})
+
+window.addEventListener('contextmenu', () => {
+  for (let movement in activeMovements) {
+    activeMovements[movement as Movements] = false
+  }
+})
+
+function getCurrentDirectionVector(): vec3 {
+  let directionVector: vec3 = [0, 0, 0]
+
+  for (const movement in MOVEMENT_TO_VECTOR_MAP) {
+    if (activeMovements[movement as Movements]) {
+      const movementVector = MOVEMENT_TO_VECTOR_MAP[movement as Movements]
+      directionVector = directionVector.map((value, index) => value + movementVector[index]) as vec3
+    }
+  }
+
+  return directionVector
 }

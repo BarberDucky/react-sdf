@@ -1,3 +1,6 @@
+import KeyboardMovementManager from "./keyboard-movement-manager"
+import { vec3 } from "./utils"
+
 const vertexSource = `#version 300 es
 
 in vec4 a_position;
@@ -157,18 +160,18 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
   const animate = () => {
     resizeCanvasToDisplaySize(canvas)
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.viewport(0, 0, canvas.width, canvas.height)
 
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    const direction = getCurrentDirectionVector()
+    const direction = keyboardMovementManager.getCurrentDirectionVector()
 
-    const length = Math.sqrt(direction[0] ** 2 + direction[1] ** 2 + direction[2] ** 2);
+    const length = Math.sqrt(direction[0] ** 2 + direction[1] ** 2 + direction[2] ** 2)
     if (length > 0) {
-      direction[0] /= length;
-      direction[1] /= length;
-      direction[2] /= length;
+      direction[0] /= length
+      direction[1] /= length
+      direction[2] /= length
     }
 
     cameraOrigin = cameraOrigin.map((value, index) => value + direction[index] * CAMERA_SPEED) as vec3
@@ -184,93 +187,4 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   animate()
 }
 
-type Movements =
-  'Forward' |
-  'Backward' |
-  'Left' |
-  'Right' |
-  'Up' |
-  'Down'
-
-const KEY_TO_MOVEMENT_MAP: Record<string, Movements | undefined> = {
-  ['w']: 'Forward',
-  ['W']: 'Forward',
-  ['ArrowUp']: 'Forward',
-
-  ['s']: 'Backward',
-  ['S']: 'Backward',
-  ['ArrowDown']: 'Backward',
-
-  ['a']: 'Left',
-  ['A']: 'Left',
-  ['ArrowLeft']: 'Left',
-
-  ['d']: 'Right',
-  ['D']: 'Right',
-  ['ArrowRight']: 'Right',
-
-  [' ']: 'Up',
-
-  ['Shift']: 'Down',
-}
-
-type vec3 = [number, number, number]
-
-const MOVEMENT_TO_VECTOR_MAP: Record<Movements, vec3> = {
-  ['Forward']: [0, 0, 1],
-  ['Backward']: [0, 0, -1],
-  ['Left']: [-1, 0, 0],
-  ['Right']: [1, 0, 0],
-  ['Up']: [0, 1, 0],
-  ['Down']: [0, -1, 0],
-}
-
-let activeMovements: Record<Movements, boolean> = {
-  ['Forward']: false,
-  ['Backward']: false,
-  ['Left']: false,
-  ['Right']: false,
-  ['Up']: false,
-  ['Down']: false,
-}
-
-document.addEventListener('keydown', e => {
-  const pressedKey = KEY_TO_MOVEMENT_MAP[e.key]
-
-  if (pressedKey == null) { return }
-
-  activeMovements[pressedKey] = true
-})
-
-document.addEventListener('keyup', e => {
-  const pressedKey = KEY_TO_MOVEMENT_MAP[e.key]
-
-  if (pressedKey == null) { return }
-
-  activeMovements[pressedKey] = false
-})
-
-window.addEventListener('blur', () => {
-  for (let movement in activeMovements) {
-    activeMovements[movement as Movements] = false
-  }
-})
-
-window.addEventListener('contextmenu', () => {
-  for (let movement in activeMovements) {
-    activeMovements[movement as Movements] = false
-  }
-})
-
-function getCurrentDirectionVector(): vec3 {
-  let directionVector: vec3 = [0, 0, 0]
-
-  for (const movement in MOVEMENT_TO_VECTOR_MAP) {
-    if (activeMovements[movement as Movements]) {
-      const movementVector = MOVEMENT_TO_VECTOR_MAP[movement as Movements]
-      directionVector = directionVector.map((value, index) => value + movementVector[index]) as vec3
-    }
-  }
-
-  return directionVector
-}
+const keyboardMovementManager = new KeyboardMovementManager()

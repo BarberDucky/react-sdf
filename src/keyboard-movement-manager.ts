@@ -1,4 +1,4 @@
-import { vec3 } from "./utils"
+import { Point3 } from "./utils"
 
 type Movements =
   'Forward' |
@@ -32,13 +32,13 @@ export default class KeyboardMovementManager {
     ['Shift']: 'Down',
   }
 
-  private readonly MOVEMENT_TO_VECTOR_MAP: Record<Movements, vec3> = {
-    ['Forward']: [0, 0, 1],
-    ['Backward']: [0, 0, -1],
-    ['Left']: [-1, 0, 0],
-    ['Right']: [1, 0, 0],
-    ['Up']: [0, 1, 0],
-    ['Down']: [0, -1, 0],
+  private readonly MOVEMENT_TO_VECTOR_MAP: Record<Movements, Point3> = {
+    ['Forward']: { x: 0, y: 0, z: 1 },
+    ['Backward']: { x: 0, y: 0, z: -1 },
+    ['Left']: { x: -1, y: 0, z: 0 },
+    ['Right']: { x: 1, y: 0, z: 0 },
+    ['Up']: { x: 0, y: 1, z: 0 },
+    ['Down']: { x: 0, y: -1, z: 0 },
   }
 
   private activeMovements: Record<Movements, boolean> = {
@@ -80,13 +80,17 @@ export default class KeyboardMovementManager {
     })
   }
 
-  public getCurrentDirectionVector(): vec3 {
-    let directionVector: vec3 = [0, 0, 0]
+  public getCurrentDirectionVector(): Point3 {
+    let directionVector = { x: 0, y: 0, z: 0 }
 
     for (const movement in this.MOVEMENT_TO_VECTOR_MAP) {
       if (this.activeMovements[movement as Movements]) {
         const movementVector = this.MOVEMENT_TO_VECTOR_MAP[movement as Movements]
-        directionVector = directionVector.map((value, index) => value + movementVector[index]) as vec3
+        directionVector = {
+          x: directionVector.x + movementVector.x,
+          y: directionVector.y + movementVector.y,
+          z: directionVector.z + movementVector.z,
+        }
       }
     }
 

@@ -10,6 +10,8 @@ type Movements =
 
 export default class KeyboardMovementManager {
 
+  private isShiftPressed = false
+
   private readonly KEY_TO_MOVEMENT_MAP: Record<string, Movements | undefined> = {
     ['w']: 'Forward',
     ['W']: 'Forward',
@@ -52,6 +54,11 @@ export default class KeyboardMovementManager {
 
   public constructor() {
     document.addEventListener('keydown', e => {
+
+      if (e.key == 'Shift') {
+        this.isShiftPressed = true
+      }
+
       const pressedKey = this.KEY_TO_MOVEMENT_MAP[e.key]
 
       if (pressedKey == null) { return }
@@ -60,6 +67,11 @@ export default class KeyboardMovementManager {
     })
 
     document.addEventListener('keyup', e => {
+      
+      if (e.key == 'Shift') {
+        this.isShiftPressed = false
+      }
+      
       const pressedKey = this.KEY_TO_MOVEMENT_MAP[e.key]
 
       if (pressedKey == null) { return }
@@ -97,4 +109,7 @@ export default class KeyboardMovementManager {
     return directionVector
   }
 
+  public getIsShiftPressed(): boolean {
+    return this.isShiftPressed
+  }
 }

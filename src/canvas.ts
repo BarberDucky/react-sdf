@@ -18,9 +18,9 @@ out vec4 outColor;
 
 uniform vec2 iResolution;
 uniform vec3 iCameraOrigin;
-uniform vec3 iLookAt;
 
 uniform vec2 iRotationAngles;
+uniform vec2 iPanPosition;
 
 mat2 rot2D(float a) {
     return mat2(cos(a), -sin(a), sin(a), cos(a));
@@ -32,10 +32,12 @@ float sdSphere( vec3 p, float s )
 }
 
 float map(vec3 p) {
-  float sphere1 = sdSphere(p - iLookAt, 1.);
-  float sphere2 = sdSphere(p - vec3(1.1, 0., 0.), 1.2);
+  float sphere1 = sdSphere(p, 1.);
+  float sphere2 = sdSphere(p - vec3(1.2, 0., 0.), 1.);
+  float sphere3 = sdSphere(p - vec3(0., 1.2, 0.), 1.);
 
   float d = min(sphere1, sphere2);
+  d = min(d, sphere3);
 
   return d;
 }
@@ -51,19 +53,19 @@ void main() {
   vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
 
   vec3 ro = iCameraOrigin;
+  vec3 ta = iCameraOrigin + vec3(0., 0., 3);
 
   float yaw   = iRotationAngles.x * 0.075;
   float pitch = iRotationAngles.y * 0.075;
-  float r1    = distance(iLookAt, ro);
+  float r1    = distance(ta, ro);
 
-  vec3 ta = iLookAt;
-
+  
   ro = vec3(
       ta.x + r1 * cos(pitch) * sin(yaw),
       ta.y + r1 * sin(pitch),
       ta.z + r1 * cos(pitch) * cos(yaw)
   );
-  
+
   float zoom = 1.;
 
   vec3 f = normalize(ta-ro);
@@ -73,6 +75,11 @@ void main() {
   vec3 c = ro + f*zoom;
   vec3 i = c + uv.x*r + uv.y*u;
   // vec3 rd = i-ro;
+
+  vec3 offset = iPanPosition.x * r - iPanPosition.y * u;
+  
+  ro += offset;
+  ta += offset;
 
   mat3 camera = setCamera(ta, ro);
 
@@ -168,9 +175,9 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   const positionAttributeLocation = gl.getAttribLocation(program, 'a_position')
   const uResolutionLocation = gl.getUniformLocation(program, 'iResolution')
   const uCameraOriginLocation = gl.getUniformLocation(program, 'iCameraOrigin')
-  const uLookAt = gl.getUniformLocation(program, 'iLookAt')
 
   const uRotationAngles = gl.getUniformLocation(program, 'iRotationAngles')
+  const uPanPosition = gl.getUniformLocation(program, 'iPanPosition')
 
   const positionBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -200,16 +207,27 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   gl.bindVertexArray(vao)
 
   let cameraOrigin: Point3 = { x: 0, y: 0, z: -3 }
-  const CAMERA_SPEED = 0.1
-  const PAN_SPEED = 0.01
-
   let rotationAngles: Point2 = { x: 0, y: 0 }
+  let panPosition: Point2 = { x: 0, y: 0 }
+
+  const CAMERA_SPEED = 0.1
+  const PAN_SPEED = 0.005
 
   mouseMovementManager.addCallback(deltaMove => {
-    rotationAngles = {
-      x: rotationAngles.x + deltaMove.x * CAMERA_SPEED,
-      y: rotationAngles.y + deltaMove.y * CAMERA_SPEED,
+    if (!keyboardMovementManager.getIsShiftPressed()) {
+      rotationAngles = {
+        x: rotationAngles.x + deltaMove.x * CAMERA_SPEED,
+        y: rotationAngles.y + deltaMove.y * CAMERA_SPEED,
+      }
     }
+
+    if (keyboardMovementManager.getIsShiftPressed()) {
+      panPosition = {
+        x: panPosition.x - deltaMove.x * PAN_SPEED,
+        y: panPosition.y - deltaMove.y * PAN_SPEED,
+      }
+    }
+
   })
 
   const animate = () => {
@@ -228,9 +246,9 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
     gl.uniform2f(uResolutionLocation, canvas.width, canvas.height)
     gl.uniform3f(uCameraOriginLocation, cameraOrigin.x, cameraOrigin.y, cameraOrigin.z)
-    gl.uniform3f(uLookAt, 0, 0, 0)
 
     gl.uniform2f(uRotationAngles, rotationAngles.x, rotationAngles.y)
+    gl.uniform2f(uPanPosition, panPosition.x, panPosition.y)
 
     gl.drawArrays(gl.TRIANGLES, 0, 6)
 

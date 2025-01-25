@@ -5,7 +5,8 @@ export default class MouseMovementManager {
   private isDragging = false
   private dragStart: Point2 | null = null
 
-  private callbacks: Array<(deltaMove: Point2) => void> = []
+  private moveCallbacks: Array<(deltaMove: Point2) => void> = []
+  private wheelCallbacks: Array<(deltaWheel: number) => void> = []
 
   public constructor() {
     document.addEventListener('pointerdown', e => {
@@ -27,9 +28,15 @@ export default class MouseMovementManager {
 
         this.dragStart = { x: e.clientX, y: e.clientY }
 
-        for (const fn of this.callbacks) {
+        for (const fn of this.moveCallbacks) {
           fn(delta)
         }
+      }
+    })
+
+    document.addEventListener('wheel', e => {
+      for (const fn of this.wheelCallbacks) {
+        fn(e.deltaY)
       }
     })
 
@@ -42,7 +49,11 @@ export default class MouseMovementManager {
     })
   }
 
-  public addCallback(fn: (deltaMove: Point2) => void) {
-    this.callbacks.push(fn)
+  public addMoveCallback(fn: (deltaMove: Point2) => void) {
+    this.moveCallbacks.push(fn)
+  }
+
+  public addWheelCallback(fn: (deltaWheel: number) => void) {
+    this.wheelCallbacks.push(fn)
   }
 }

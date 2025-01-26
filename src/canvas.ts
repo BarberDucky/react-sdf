@@ -35,6 +35,12 @@ float sdCylinder( vec3 p, vec3 c )
   return length(p.xz-c.xy)-c.z;
 }
 
+float opLineRepetition( in vec3 p, in vec3 s, vec3 c )
+{
+  vec3 q = p - s*round(p/s);
+  return sdCylinder( q, c );
+}
+
 float sdSphere( vec3 p, float s )
 {
   return length(p)-s;
@@ -53,6 +59,9 @@ float map(vec3 p) {
   float yAxis = sdCylinder(yPos, vec3(.005));
   float zAxis = sdCylinder(zPos, vec3(.005));
 
+  float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(.001));
+  float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(.001));
+
   float sphere1 = sdSphere(p, 1.);
   float sphere2 = sdSphere(p - vec3(1.2, 0., 0.), 1.);
   float sphere3 = sdSphere(p - vec3(0., 1.2, 0.), 1.);
@@ -60,6 +69,9 @@ float map(vec3 p) {
   float d = xAxis;
   d = min(d, yAxis);
   d = min(d, zAxis);
+
+  d = min(d, xAxisRepeat);
+  d = min(d, zAxisRepeat);
 
   d = min(d, sphere1);
   d = min(d, sphere2);

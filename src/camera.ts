@@ -7,8 +7,10 @@ export class Camera {
   private PAN_SPEED = 0.015
   private ZOOM_SPEED = 0.0045
 
-  private origin: Point3 = { x: 0, y: 0, z: -3 }
-  private target: Point3 = { x: 0, y: 0, z: 0 }
+  public constructor(
+    private origin: Point3,
+    private target: Point3,
+  ) { }
 
   public zoom(zoomAmount: number) {
     const { origin, target } = this

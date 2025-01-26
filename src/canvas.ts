@@ -83,7 +83,7 @@ void main() {
 
   mat3 camera = setCamera(ta, ro);
 
-  vec3 rd = normalize(camera * vec3(uv, 1.0));
+  vec3 rd = normalize(camera * vec3(uv * 0.5, 1.0));
 
   vec3 col = vec3(0.);
 
@@ -204,8 +204,11 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
   gl.bindVertexArray(vao)
 
-  const camera = new Camera()
-  // camera.zoom(-3)
+  const camera = new Camera(
+    { x: 2, y: 2, z: -2 },
+    { x: 0, y: 0, z: 0 }
+  )
+  camera.zoom(300)
 
   mouseMovementManager.addMoveCallback(deltaMove => {
     if (!keyboardMovementManager.getIsShiftPressed()) {

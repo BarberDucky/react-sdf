@@ -20,17 +20,49 @@ uniform vec2 iResolution;
 uniform vec3 iCameraOrigin;
 uniform vec3 iLookAt;
 
+vec3 rot3D( vec3 p, vec3 axis, float angle ) {
+  return mix(dot(axis, p) * axis, p, cos(angle)) + cross(axis, p) * sin(angle);
+}
+
+mat2 rot2D(float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  return mat2(c, -s, s, c);
+}
+
+float sdCylinder( vec3 p, vec3 c )
+{
+  return length(p.xz-c.xy)-c.z;
+}
+
 float sdSphere( vec3 p, float s )
 {
   return length(p)-s;
 }
 
 float map(vec3 p) {
+
+  vec3 xPos = p;
+  vec3 yPos = p;
+  vec3 zPos = p;
+  
+  xPos.yz *= rot2D(3.14 / 2.);
+  zPos.xy *= rot2D(3.14 / 2.);
+
+  float xAxis = sdCylinder(xPos, vec3(.005));
+  float yAxis = sdCylinder(yPos, vec3(.005));
+  float zAxis = sdCylinder(zPos, vec3(.005));
+
   float sphere1 = sdSphere(p, 1.);
   float sphere2 = sdSphere(p - vec3(1.2, 0., 0.), 1.);
   float sphere3 = sdSphere(p - vec3(0., 1.2, 0.), 1.);
 
-  float d = min(sphere1, sphere2);
+  float d = xAxis;
+  d = min(d, yAxis);
+  d = min(d, zAxis);
+
+  d = min(d, sphere1);
+  d = min(d, sphere2);
   d = min(d, sphere3);
 
   return d;

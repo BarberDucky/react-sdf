@@ -224,11 +224,11 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 
   mouseMovementManager.addMoveCallback(deltaMove => {
     if (!keyboardMovementManager.getIsShiftPressed()) {
-      camera.orbit(deltaMove.x, deltaMove.y)
+      camera.orbit(-deltaMove.x, -deltaMove.y)
     }
 
     if (keyboardMovementManager.getIsShiftPressed()) {
-      camera.pan(deltaMove.x, deltaMove.y)
+      camera.pan(-deltaMove.x, -deltaMove.y)
     }
   })
 

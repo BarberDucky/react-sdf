@@ -20,6 +20,11 @@ uniform vec2 iResolution;
 uniform vec3 iCameraOrigin;
 uniform vec3 iLookAt;
 
+struct MaterialDist {
+  vec3 color;
+  float dist;
+};
+
 vec3 rot3D( vec3 p, vec3 axis, float angle ) {
   return mix(dot(axis, p) * axis, p, cos(angle)) + cross(axis, p) * sin(angle);
 }
@@ -46,7 +51,7 @@ float sdSphere( vec3 p, float s )
   return length(p)-s;
 }
 
-float map(vec3 p) {
+MaterialDist map(vec3 p) {
 
   vec3 xPos = p;
   vec3 yPos = p;
@@ -66,18 +71,41 @@ float map(vec3 p) {
   float sphere2 = sdSphere(p - vec3(1.2, 0., 0.), 1.);
   float sphere3 = sdSphere(p - vec3(0., 1.2, 0.), 1.);
 
-  float d = xAxis;
-  d = min(d, yAxis);
-  d = min(d, zAxis);
 
-  d = min(d, xAxisRepeat);
-  d = min(d, zAxisRepeat);
+  MaterialDist res = MaterialDist(
+    vec3(0.5),
+    xAxisRepeat
+  );  
 
-  d = min(d, sphere1);
-  d = min(d, sphere2);
-  d = min(d, sphere3);
+  res.color = zAxisRepeat < res.dist ? vec3(0.5) : res.color;
+  res.dist = min(res.dist, zAxisRepeat);
 
-  return d;
+
+  // AXES
+
+  res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
+  res.dist = min(res.dist, xAxis);
+
+  res.color = yAxis < res.dist ? vec3(0., 1., 0.) : res.color;
+  res.dist = min(res.dist, yAxis);
+
+  res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
+  res.dist = min(res.dist, zAxis);
+
+
+  // SPHERES
+
+  res.color = sphere1 < res.dist ? vec3(0.5) : res.color;
+  res.dist = min(res.dist, sphere1);
+  
+  res.color = sphere2 < res.dist ? vec3(0.5) : res.color;
+  res.dist = min(res.dist, sphere2);
+  
+  res.color = sphere3 < res.dist ? vec3(0.) : res.color;
+  res.dist = min(res.dist, sphere3);
+
+
+  return res;
 }
 
 mat3 setCamera(vec3 target, vec3 position) {
@@ -100,18 +128,27 @@ void main() {
   vec3 col = vec3(0.);
 
   float t = 0.;
+  MaterialDist m = MaterialDist(vec3(0.), 0.);
 
-  for (int i = 0; i < 80; i++) {
+  for (int i = 0; i < 256; i++) {
     vec3 p = ro + rd * t;
 
-    float d = map(p);
+    m = map(p);
+
+    float d = m.dist;
 
     t += d;
 
-    if (d < .001 || t > 100.) break;
-  }
+    if (d < .001) break;
 
-  col = vec3(t * .2);
+    if (t > 1000.) {
+      m.color = vec3(1.);
+      break;
+    }
+
+  }
+  
+  col = mix(m.color, vec3(1.), t * 0.01);
 
   outColor = vec4(col, 1.);
 }`

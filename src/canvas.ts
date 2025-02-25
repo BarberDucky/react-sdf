@@ -95,17 +95,38 @@ MaterialDist map(vec3 p) {
 
   // SPHERES
 
-  res.color = sphere1 < res.dist ? vec3(0.5) : res.color;
+  res.color = sphere1 < res.dist ? vec3(0., 0., 1.) : res.color;
   res.dist = min(res.dist, sphere1);
   
-  res.color = sphere2 < res.dist ? vec3(0.5) : res.color;
+  res.color = sphere2 < res.dist ? vec3(0., 1., 0.) : res.color;
   res.dist = min(res.dist, sphere2);
   
-  res.color = sphere3 < res.dist ? vec3(0.) : res.color;
+  res.color = sphere3 < res.dist ? vec3(1., 0., 0.) : res.color;
   res.dist = min(res.dist, sphere3);
 
 
   return res;
+}
+
+vec3 GetNormal(vec3 p) {
+  float EPS = 0.0001;
+  vec3 n = vec3(
+    map(p + vec3(EPS, 0., 0.)).dist - map(p - vec3(EPS, 0., 0.)).dist,
+    map(p + vec3(0., EPS, 0.)).dist - map(p - vec3(0., EPS, 0.)).dist,
+    map(p + vec3(0., 0., EPS)).dist - map(p - vec3(0., 0., EPS)).dist
+  );
+
+  return normalize(n);
+}
+
+vec3 GetLighting (vec3 pos, vec3 normal, vec3 lightColor, vec3 lightDir) {
+  float dp = clamp(dot(normal, lightDir), 0., 1.);
+
+  return lightColor * dp;
+}
+
+vec3 GetSpecular (vec3 pos, vec3 normal, vec3 lightColor, vec3 lightDir) {
+  return vec3(pow(max(0., dot(normalize(reflect(lightDir, normal)), -pos)), 32.));
 }
 
 mat3 setCamera(vec3 target, vec3 position) {
@@ -129,9 +150,10 @@ void main() {
 
   float t = 0.;
   MaterialDist m = MaterialDist(vec3(0.), 0.);
+  vec3 p;
 
   for (int i = 0; i < 256; i++) {
-    vec3 p = ro + rd * t;
+    p = ro + rd * t;
 
     m = map(p);
 
@@ -148,7 +170,15 @@ void main() {
 
   }
   
-  col = mix(m.color, vec3(1.), t * 0.01);
+  vec3 lightDir = normalize(vec3(1., 2., -1.));
+  vec3 lightColor = vec3(1.);
+  vec3 normal = GetNormal(p);
+  vec3 light = GetLighting(p, normal, lightColor, lightDir);
+  vec3 spec = GetSpecular(-rd, normal, lightColor, lightDir);
+
+  col = m.color * light + spec * .0;
+  col = pow(col, vec3(1. / 2.2));
+  col = mix(col, vec3(1.), t * 0.02);
 
   outColor = vec4(col, 1.);
 }`

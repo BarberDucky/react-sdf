@@ -22,6 +22,7 @@ uniform vec3 iLookAt;
 
 struct MaterialDist {
   vec3 color;
+  bool isLit;
   float dist;
 };
 
@@ -74,6 +75,7 @@ MaterialDist map(vec3 p) {
 
   MaterialDist res = MaterialDist(
     vec3(0.5),
+    false,
     xAxisRepeat
   );  
 
@@ -96,14 +98,16 @@ MaterialDist map(vec3 p) {
   // SPHERES
 
   res.color = sphere1 < res.dist ? vec3(0., 0., 1.) : res.color;
+  res.isLit = sphere1 < res.dist ? true : res.isLit;
   res.dist = min(res.dist, sphere1);
   
   res.color = sphere2 < res.dist ? vec3(0., 1., 0.) : res.color;
+  res.isLit = sphere2 < res.dist ? true : res.isLit;
   res.dist = min(res.dist, sphere2);
   
   res.color = sphere3 < res.dist ? vec3(1., 0., 0.) : res.color;
+  res.isLit = sphere3 < res.dist ? true : res.isLit;
   res.dist = min(res.dist, sphere3);
-
 
   return res;
 }
@@ -149,7 +153,7 @@ void main() {
   vec3 col = vec3(0.);
 
   float t = 0.;
-  MaterialDist m = MaterialDist(vec3(0.), 0.);
+  MaterialDist m = MaterialDist(vec3(0.), false, 0.);
   vec3 p;
 
   for (int i = 0; i < 256; i++) {
@@ -173,10 +177,12 @@ void main() {
   vec3 lightDir = normalize(vec3(1., 2., -1.));
   vec3 lightColor = vec3(1.);
   vec3 normal = GetNormal(p);
-  vec3 light = GetLighting(p, normal, lightColor, lightDir);
+  vec3 lambertian = GetLighting(p, normal, lightColor, lightDir);
   vec3 spec = GetSpecular(-rd, normal, lightColor, lightDir);
 
-  col = m.color * light + spec * .0;
+  vec3 light = m.isLit ? lambertian + spec * .0 : vec3(1.);
+
+  col = m.color * light;
   col = pow(col, vec3(1. / 2.2));
   col = mix(col, vec3(1.), t * 0.02);
 

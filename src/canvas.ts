@@ -1,5 +1,6 @@
 import { Camera } from "./camera"
 import KeyboardMovementManager from "./keyboard-movement-manager"
+import { scene } from "./model/scene"
 import MouseMovementManager from "./mouse-movement-manager"
 
 const vertexSource = `#version 300 es
@@ -68,11 +69,6 @@ MaterialDist map(vec3 p) {
   float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(.001));
   float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(.001));
 
-  float sphere1 = sdSphere(p, 1.);
-  float sphere2 = sdSphere(p - vec3(1.2, 0., 0.), 1.);
-  float sphere3 = sdSphere(p - vec3(0., 1.2, 0.), 1.);
-
-
   MaterialDist res = MaterialDist(
     vec3(0.5),
     false,
@@ -97,17 +93,7 @@ MaterialDist map(vec3 p) {
 
   // SPHERES
 
-  res.color = sphere1 < res.dist ? vec3(0., 0., 1.) : res.color;
-  res.isLit = sphere1 < res.dist ? true : res.isLit;
-  res.dist = min(res.dist, sphere1);
-  
-  res.color = sphere2 < res.dist ? vec3(0., 1., 0.) : res.color;
-  res.isLit = sphere2 < res.dist ? true : res.isLit;
-  res.dist = min(res.dist, sphere2);
-  
-  res.color = sphere3 < res.dist ? vec3(1., 0., 0.) : res.color;
-  res.isLit = sphere3 < res.dist ? true : res.isLit;
-  res.dist = min(res.dist, sphere3);
+  ${generateObjectsString()}
 
   return res;
 }
@@ -326,6 +312,10 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
   }
 
   animate()
+}
+
+function generateObjectsString() {
+  return scene.map((shape, index) => shape.getShaderString(index)).join('')
 }
 
 const keyboardMovementManager = new KeyboardMovementManager()

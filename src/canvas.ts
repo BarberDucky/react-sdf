@@ -1,7 +1,12 @@
 import { Camera } from "./camera"
 import KeyboardMovementManager from "./keyboard-movement-manager"
-import { scene } from "./model/scene"
+import { exampleScene1 } from "./model/scenes"
+import { SdfRenderer } from "./model/sdf-shapes"
+import { ShapeController } from "./model/shape-controller"
 import MouseMovementManager from "./mouse-movement-manager"
+
+const shapeController = new ShapeController(exampleScene1)
+const sdfRenderer = new SdfRenderer() 
 
 const vertexSource = `#version 300 es
 
@@ -315,7 +320,8 @@ export function canvasSetup(canvas: HTMLCanvasElement | null) {
 }
 
 function generateObjectsString() {
-  return scene.map((shape, index) => shape.getShaderString(index)).join('')
+  return shapeController.shapes
+    .map((shape, index) => sdfRenderer.getShaderString(shape, index)).join('')
 }
 
 const keyboardMovementManager = new KeyboardMovementManager()

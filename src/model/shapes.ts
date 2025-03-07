@@ -1,11 +1,18 @@
 import { Point3 } from "../utils";
 
-export interface Shape {
-  position: Point3
-  color: Point3
+export abstract class Shape {
+  constructor(
+    public position: Point3,
+    public color: Point3,
+  ) { }
 }
 
-export interface Sphere extends Shape {
-  radius: number
-  rotation: number
+export class Sphere extends Shape {
+  constructor(
+    public position: Point3,
+    public color: Point3,
+    public radius: number
+  ) {
+    super(position, color)
+  }
 }

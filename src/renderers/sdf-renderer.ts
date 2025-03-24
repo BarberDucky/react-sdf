@@ -91,12 +91,12 @@ export class SdfRenderer {
         float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(.001));
 
         MaterialDist res = MaterialDist(
-          vec3(0.5),
+          vec3(0.8),
           false,
           xAxisRepeat
         );  
 
-        res.color = zAxisRepeat < res.dist ? vec3(0.5) : res.color;
+        res.color = zAxisRepeat < res.dist ? vec3(0.8) : res.color;
         res.dist = min(res.dist, zAxisRepeat);
 
 
@@ -147,9 +147,7 @@ export class SdfRenderer {
         return mat3(x, y, z);
       }
 
-      void main() {
-        vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
-
+      vec3 render (vec2 uv) {
         vec3 ro = iCameraOrigin;
         vec3 ta = iLookAt;
 
@@ -192,6 +190,24 @@ export class SdfRenderer {
         col = m.color * light;
         col = pow(col, vec3(1. / 2.2));
         col = mix(col, vec3(1.), t * 0.02);
+
+        return col;
+      }
+
+      void main() {
+        vec2 uv = (gl_FragCoord.xy * 2. - iResolution.xy) / iResolution.y;
+
+        vec3 col = vec3(0.);
+
+        for(int y = 0; y < 2; y++) {
+        for(int x = 0; x < 2; x++) {
+            vec2 off = vec2(float(x),float(y))/2.;
+            vec2 xy = (-iResolution.xy+2.0*(gl_FragCoord.xy+off)) / iResolution.y;
+        	  col += render(xy)*0.25;
+          }
+        }
+
+        // col = render(uv);
 
         outColor = vec4(col, 1.);
       }`

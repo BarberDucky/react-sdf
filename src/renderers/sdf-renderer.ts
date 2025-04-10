@@ -1,24 +1,10 @@
-import { Shape, Sphere } from "../model/shapes"
-import { dedent, floatToGlslFloat, point3ToVec3 } from "../utils"
+import { Shape } from "../model/shapes"
+import { dedent } from "../utils"
+import { SdfShapeVisitor } from "./sdf-shape-visitor"
 
 export class SdfRenderer {
 
-  getShaderString(shape: Shape, id: number): string {
-    if (shape instanceof Sphere) {
-      return this.getSphereShaderString(shape, id)
-    } else {
-      console.warn(`Shape type ${typeof shape} not defined for SDF renderer.`)
-      return ''
-    }
-  }
-
-  getSphereShaderString(sphere: Sphere, id: number) {
-    return dedent`
-      float sphere${id} = sdSphere(p - ${point3ToVec3(sphere.position)}, ${floatToGlslFloat(sphere.radius)});
-      res.color = sphere${id} < res.dist ? ${point3ToVec3(sphere.color)} : res.color;
-      res.isLit = sphere${id} < res.dist ? true : res.isLit;
-      res.dist = min(res.dist, sphere${id});`
-  }
+  private visitor = new SdfShapeVisitor()
 
   generateVertexShaderString() {
     return dedent`#version 300 es
@@ -31,7 +17,7 @@ export class SdfRenderer {
 
   generateFragmentShaderString(shapes: Array<Shape>) {
     const objectsString = shapes
-      .map((shape, index) => this.getShaderString(shape, index)).join('')
+      .map(shape => shape.accept(this.visitor)).join('')
 
     return dedent`#version 300 es
       precision highp float;

@@ -3,6 +3,8 @@ import { Point3 } from "../utils";
 
 export class ShapeController {
 
+  private nextId = 0
+
   constructor(
     private _shapes: Array<Shape> = []
   ) { }
@@ -12,7 +14,10 @@ export class ShapeController {
   }
 
   addSphere(position: Point3, radius: number, color: Point3) {
+    this.nextId++
+
     const sphere = new Sphere(
+      this.nextId,
       position,
       color,
       radius,

@@ -76,6 +76,9 @@ export class SdfRenderer {
 
       MaterialDist map(vec3 p) {
 
+        float mainAxisWidth = .005;
+        float gridAxisWidth = .001;
+
         vec3 xPos = p;
         vec3 yPos = p;
         vec3 zPos = p;
@@ -83,12 +86,12 @@ export class SdfRenderer {
         xPos.yz *= rot2D(3.14 / 2.);
         zPos.xy *= rot2D(3.14 / 2.);
 
-        float xAxis = sdCylinder(xPos, vec3(.005));
-        float yAxis = sdCylinder(yPos, vec3(.005));
-        float zAxis = sdCylinder(zPos, vec3(.005));
+        float xAxis = sdCylinder(xPos + mainAxisWidth, vec3(mainAxisWidth));
+        float yAxis = sdCylinder(yPos + mainAxisWidth, vec3(mainAxisWidth));
+        float zAxis = sdCylinder(zPos + mainAxisWidth, vec3(mainAxisWidth));
 
-        float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(.001));
-        float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(.001));
+        float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(gridAxisWidth));
+        float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(gridAxisWidth));
 
         MaterialDist res = MaterialDist(
           vec3(0.8),

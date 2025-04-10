@@ -8,4 +8,10 @@ export abstract class AbstractUiBindings {
     color: Point3,
   ): void
 
+  abstract createBox(
+    position: Point3,
+    dimensions: Point3,
+    color: Point3,
+  ): void
+
 }

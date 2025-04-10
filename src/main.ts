@@ -21,6 +21,10 @@ class UiBindings extends AbstractUiBindings {
   override createSphere(position: Point3, radius: number, color: Point3) {
     shapeController.addSphere(position, radius, color)
   }
+
+  override createBox(position: Point3, dimensions: Point3, color: Point3) {
+    shapeController.addBox(position, dimensions, color)
+  }
 }
 
 const ui = new Ui(document.querySelector<HTMLCanvasElement>('#app')!, new UiBindings())

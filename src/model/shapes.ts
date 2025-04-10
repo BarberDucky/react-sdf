@@ -26,3 +26,19 @@ export class Sphere extends Shape {
   }
 
 }
+
+export class Box extends Shape {
+  constructor(
+    public id: number,
+    public position: Point3,
+    public color: Point3,
+    public dimensions: Point3,
+  ) {
+    super(id, position, color)
+  }
+
+  accept(v: Visitor): string {
+    return v.visitBox(this)
+  }
+
+}

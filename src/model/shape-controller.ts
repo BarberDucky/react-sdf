@@ -1,42 +1,40 @@
-import { Box, Shape, Sphere } from "../model/shapes";
+import { Box, Sphere } from "../model/shapes";
 import { Point3 } from "../utils";
+import { UnionOperation } from "./operations";
+import { Operation } from "./shape-tree";
 
 export class ShapeController {
 
   private nextId = 0
 
   constructor(
-    private _shapes: Array<Shape> = []
+    private root: Operation = new UnionOperation('root')
   ) { }
 
-  get shapes(): Array<Shape> {
-    return this._shapes
+  get rootOperation(): Operation {
+    return this.root
   }
 
   addSphere(position: Point3, radius: number, color: Point3) {
-    this.nextId++
-
     const sphere = new Sphere(
-      this.nextId,
+      'shp' + this.nextId,
       position,
       color,
       radius,
     )
-
-    this._shapes.push(sphere)
+    this.nextId++
+    this.root.addNodes(sphere)
   }
 
   addBox(position: Point3, dimensions: Point3, color: Point3) {
-    this.nextId++
-
     const box = new Box(
-      this.nextId,
+      'shp' + this.nextId,
       position,
       color,
       dimensions,
     )
-
-    this._shapes.push(box)
+    this.nextId++
+    this.root.addNodes(box)
   }
 
 }

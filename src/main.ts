@@ -15,7 +15,8 @@ const sdfRenderer = new SdfRenderer()
 const keyboardMovementManager = new KeyboardMovementManager()
 const mouseMovementManager = new MouseMovementManager()
 const canvas = initializeCanvas('#mainCanvas')
-const webGlContext = new WebGlContext(canvas, sdfRenderer.generateVertexShaderString(), sdfRenderer.generateFragmentShaderString(shapeController.shapes))
+
+const webGlContext = new WebGlContext(canvas, sdfRenderer.generateVertexShaderString(), sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
 class UiBindings extends AbstractUiBindings {
   override createSphere(position: Point3, radius: number, color: Point3) {
@@ -53,7 +54,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.shapes))
+  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)

@@ -1,4 +1,4 @@
-import { Shape } from "../model/shapes"
+import { Operation } from "../model/shape-tree"
 import { dedent } from "../utils"
 import { SdfShapeVisitor } from "./sdf-shape-visitor"
 
@@ -15,9 +15,8 @@ export class SdfRenderer {
       }`
   }
 
-  generateFragmentShaderString(shapes: Array<Shape>) {
-    const objectsString = shapes
-      .map(shape => shape.accept(this.visitor)).join('')
+  generateFragmentShaderString(root: Operation) {
+    const objectsString = root.accept(this.visitor, 'res')
 
     return dedent`#version 300 es
       precision highp float;
@@ -42,6 +41,17 @@ export class SdfRenderer {
         float s = sin(angle);
         float c = cos(angle);
         return mat2(c, -s, s, c);
+      }
+
+      float opUnion( float d1, float d2 )
+      {
+          return min(d1,d2);
+      }
+
+      float opSmoothUnion( float d1, float d2, float k )
+      {
+          float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+          return mix( d2, d1, h ) - k*h*(1.0-h);
       }
 
       float sdCylinder( vec3 p, vec3 c )
@@ -92,24 +102,24 @@ export class SdfRenderer {
         );  
 
         res.color = zAxisRepeat < res.dist ? vec3(0.8) : res.color;
-        res.dist = min(res.dist, zAxisRepeat);
+        res.dist = opUnion(res.dist, zAxisRepeat);
 
 
         // AXES
 
         res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
-        res.dist = min(res.dist, xAxis);
+        res.dist = opUnion(res.dist, xAxis);
 
         res.color = yAxis < res.dist ? vec3(0., 1., 0.) : res.color;
-        res.dist = min(res.dist, yAxis);
+        res.dist = opUnion(res.dist, yAxis);
 
         res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
-        res.dist = min(res.dist, zAxis);
+        res.dist = opUnion(res.dist, zAxis);
 
-
-        // SPHERES
+        // SHAPES
 
         ${objectsString}
+        res.dist = opUnion(res.dist, root.dist);
 
         return res;
       }

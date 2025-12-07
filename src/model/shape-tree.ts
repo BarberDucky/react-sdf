@@ -6,6 +6,8 @@ export abstract class ShapeTreeNode {
   abstract id: string
   abstract accept(v: Visitor, parent: string): string
 
+  parent: Operation | null = null
+
 }
 
 export abstract class Shape extends ShapeTreeNode {
@@ -25,10 +27,15 @@ export abstract class Operation extends ShapeTreeNode {
   }
 
   public addNodes(...n: ShapeTreeNode[]) {
+    n.forEach(node => {
+      node.parent?.removeNode(node)
+      node.parent = this
+    })
     this.shapeNodes.push(...n)
   }
 
   public removeNode(n: ShapeTreeNode) {
+    n.parent = null
     this.shapeNodes = this.shapeNodes.filter(e => e != n)
   }
 

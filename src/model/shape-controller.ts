@@ -1,11 +1,11 @@
 import { Box, Sphere } from "../model/shapes";
 import { Point3 } from "../utils";
-import { UnionOperation } from "./operations";
-import { Operation } from "./shape-tree";
+import { SmoothUnionOperation, UnionOperation } from "./operations";
+import { Operation, ShapeTreeNode } from "./shape-tree";
 
 export class ShapeController {
 
-  private nextId = 0
+  private lastId = 0
 
   constructor(
     private root: Operation = new UnionOperation('root')
@@ -17,24 +17,47 @@ export class ShapeController {
 
   addSphere(position: Point3, radius: number, color: Point3) {
     const sphere = new Sphere(
-      'shp' + this.nextId,
+      'shp' + this.newId,
       position,
       color,
       radius,
     )
-    this.nextId++
     this.root.addNodes(sphere)
+    return sphere
   }
 
   addBox(position: Point3, dimensions: Point3, color: Point3) {
     const box = new Box(
-      'shp' + this.nextId,
+      'shp' + this.newId,
       position,
       color,
       dimensions,
     )
-    this.nextId++
     this.root.addNodes(box)
+    return box
+  }
+
+  addUnion() {
+    const union = new UnionOperation(
+      'op' + this.newId
+    )
+    this.root.addNodes(union)
+    return union
+  }
+
+  addSmoothUnion(smoothness: number) {
+    const smoothUnion = new SmoothUnionOperation(
+      'op' + this.newId,
+      smoothness,
+    )
+    this.root.addNodes(smoothUnion)
+    return smoothUnion
+  }
+
+  private get newId() {
+    const lastId = this.lastId
+    this.lastId++
+    return lastId
   }
 
 }

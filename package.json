@@ -10,12 +10,16 @@
   },
   "devDependencies": {
     "@types/fbjs": "^3.0.11",
-    "@types/react-reconciler": "^0.28.9",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.2",
     "typescript": "~5.6.2",
     "vite": "^6.0.5"
   },
   "dependencies": {
+    "@types/react-reconciler": "^0.28.8",
     "fbjs": "^3.0.5",
-    "react-reconciler": "^0.31.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-reconciler": "^0.29.2"
   }
 }

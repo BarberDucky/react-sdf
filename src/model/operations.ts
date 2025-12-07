@@ -14,10 +14,9 @@ export class UnionOperation extends Operation {
 
 export class SmoothUnionOperation extends Operation {
 
-  public smoothness = 0.25;
-
   constructor(
     public id: string,
+    public smoothness: number,
   ) { super() }
 
   accept(v: Visitor, root: string): string {

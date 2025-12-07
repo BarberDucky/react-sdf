@@ -3,12 +3,15 @@ import { initializeCanvas, resizeCanvasToDisplaySize } from "./canvas/canvas-uti
 import KeyboardMovementManager from "./keyboard-movement-manager"
 import { ShapeController } from "./model/shape-controller"
 import MouseMovementManager from "./mouse-movement-manager"
+import { SDFReactCanvas } from "./react/react-renderer"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import { AbstractUiBindings } from "./ui/bindings"
 import { Ui } from "./ui/ui"
 import { Point3 } from "./utils"
 import { Uniform2f, Uniform3f, WebGlContext } from "./webgl/webgl-context"
+
+import { SDFElementsObject } from "./react/reconciler"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -68,3 +71,34 @@ const animate = () => {
 }
 
 animate()
+
+const sdfReactCanvas = new SDFReactCanvas(shapeController)
+
+declare module 'react'
+{
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace JSX
+    {
+        interface IntrinsicElements extends SDFElementsObject {}
+    }
+}
+
+sdfReactCanvas.render(
+  <smoothUnion smoothness={0.5}>
+    <sphere
+      position={{ x: 0, y: 0, z: 1 }}
+      color={{ x: 1, y: 0, z: 0 }}
+      radius={1}
+    />
+    <box
+      position={{ x: 0, y: 0, z: 0 }}
+      color={{ x: 0, y: 1, z: 0 }}
+      dimensions={{ x: 1, y: 1, z: 1 }}
+    />
+    <sphere
+      position={{ x: 0, y: 0, z: -1 }}
+      color={{ x: 0, y: 0, z: 1 }}
+      radius={1}
+    />
+  </smoothUnion>
+)

@@ -15,7 +15,7 @@ export class SdfRenderer {
       }`
   }
 
-  generateFragmentShaderString(root: Operation) {
+  generateFragmentShaderString(root: Operation, gizmoEnabled: boolean) {
     const objectsString = root.accept(this.visitor, 'res')
 
     return dedent`#version 300 es
@@ -105,16 +105,21 @@ export class SdfRenderer {
         res.dist = opUnion(res.dist, zAxisRepeat);
 
 
-        // AXES
+        ${!gizmoEnabled 
+          ? ''  
+          : `
+          // AXES
 
-        res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
-        res.dist = opUnion(res.dist, xAxis);
+          res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
+          res.dist = opUnion(res.dist, xAxis);
 
-        res.color = yAxis < res.dist ? vec3(0., 1., 0.) : res.color;
-        res.dist = opUnion(res.dist, yAxis);
+          res.color = yAxis < res.dist ? vec3(0., 1., 0.) : res.color;
+          res.dist = opUnion(res.dist, yAxis);
 
-        res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
-        res.dist = opUnion(res.dist, zAxis);
+          res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
+          res.dist = opUnion(res.dist, zAxis);
+        `
+        }
 
         // SHAPES
 

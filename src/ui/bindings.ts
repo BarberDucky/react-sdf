@@ -14,4 +14,10 @@ export abstract class AbstractUiBindings {
     color: Point3,
   ): void
 
+  abstract setActiveShape(
+    shape: 'sphere' | 'box' | null,
+  ): void
+
+  abstract toggleGizmo(): void
+
 }

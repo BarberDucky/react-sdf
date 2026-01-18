@@ -14,16 +14,29 @@ import { Uniform2f, Uniform3f, WebGlContext } from "./webgl/webgl-context"
 import { SDFElementsObject } from "./react/reconciler"
 import { createRoot } from "react-dom/client"
 import { createContext } from "react"
+import { Store } from "./store"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
 const keyboardMovementManager = new KeyboardMovementManager()
 const canvas = initializeCanvas('#mainCanvas')
 const mouseMovementManager = new MouseMovementManager(canvas)
-let activeShape: 'sphere' | 'box' | null = null
-let gizmoEnabled = true
 
-const webGlContext = new WebGlContext(canvas, sdfRenderer.generateVertexShaderString(), sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, gizmoEnabled))
+interface AppStoreModel {
+  isGizmoEnabled: boolean
+  selectedShape: 'sphere' | 'box' | null
+}
+
+export const store = new Store<AppStoreModel>({
+  isGizmoEnabled: true,
+  selectedShape: null,
+})
+
+const webGlContext = new WebGlContext(
+  canvas,
+  sdfRenderer.generateVertexShaderString(),
+  sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled)
+)
 
 class UiBindings extends AbstractUiBindings {
   override createSphere(position: Point3, radius: number, color: Point3) {
@@ -35,11 +48,17 @@ class UiBindings extends AbstractUiBindings {
   }
 
   override setActiveShape(shape: "sphere" | "box" | null): void {
-    activeShape = shape
+    store.setState({
+      ...store.getState(),
+      selectedShape: shape,
+    })
   }
 
   override toggleGizmo(): void {
-    gizmoEnabled = !gizmoEnabled
+    store.setState({
+      ...store.getState(),
+      isGizmoEnabled: !store.getState().isGizmoEnabled,
+    })
   }
 }
 
@@ -49,6 +68,8 @@ const camera = new Camera(
 )
 
 mouseMovementManager.addClickCallback(position => {
+  const activeShape = store.getState().selectedShape
+
   if (activeShape === 'sphere') {
     shapeController.addSphere(
       { x: 0, y: 0, z: 0 },
@@ -63,6 +84,11 @@ mouseMovementManager.addClickCallback(position => {
       { x: Math.random(), y: Math.random(), z: Math.random() },
     )
   }
+
+  store.setState({
+    ...store.getState(),
+    selectedShape: null,
+  })
 })
 
 mouseMovementManager.addMoveCallback(deltaMove => {
@@ -84,7 +110,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, gizmoEnabled))
+  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -103,11 +129,10 @@ animate()
 
 declare module 'react'
 {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
-    namespace JSX
-    {
-        interface IntrinsicElements extends SDFElementsObject {}
-    }
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements extends SDFElementsObject { }
+  }
 }
 
 // sdfReactCanvas.render(

@@ -4,6 +4,7 @@ import { Visitor } from "./visitor";
 export abstract class ShapeTreeNode {
 
   abstract id: string
+  abstract type: string
   abstract accept(v: Visitor, parent: string): string
 
   parent: Operation | null = null

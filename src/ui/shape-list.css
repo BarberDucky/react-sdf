@@ -1,0 +1,43 @@
+.shape-list {
+  position: absolute;
+  width: fit-content;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-left: 2px solid #ddd;
+  align-items: center;
+  top: 0;
+  right: 0;
+}
+
+.shape-list-entry {
+  margin-bottom: 4px;
+  width: 180px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.shape-list-entry:hover {
+  background-color: #eaeaea;
+}
+
+.shape-list-entry:active {
+  background-color: #e4e4e4;
+}
+
+.selected {
+  background-color: blue;
+}
+
+.selected:hover {
+  background-color: #0000cc;
+}
+
+.selected:active {
+  background-color: #000099;
+}

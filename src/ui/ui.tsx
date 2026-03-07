@@ -3,15 +3,18 @@ import ShapeSelect from "./shape-select"
 import Header from "./header"
 import './ui.css'
 import { store, UiContext } from "../main"
+import ShapeList from "./shape-list"
+import ShapeProperties from "./shape-properties"
+import { Shape } from "../model/shape-tree"
 
 export type Shape = 'sphere' | 'box'
 
 const Ui = () => {
 
   const uiBindings = useContext(UiContext)
-  
+
   const uiStore = useSyncExternalStore(store.subscribe, store.getState)
-  
+
   const [gizmoActive, setGizmoActive] = useState<boolean>(true)
 
   const shapes: Array<{ type: Shape, label: string }> = [
@@ -20,12 +23,47 @@ const Ui = () => {
   ]
 
   const selectedShape = uiStore.selectedShape
-  function setSelectedShape (selectedShape: Shape | null) {
+
+  function setSelectedShape(selectedShape: Shape | null) {
     store.setState({
       ...uiStore,
       selectedShape,
     })
   }
+
+  function setSelectedExistingShape(selectedExistingShape: string) {
+    store.setState({
+      ...uiStore,
+      selectedExistingShape: selectedExistingShape == uiStore.selectedExistingShape
+        ? null
+        : selectedExistingShape,
+    })
+  }
+
+  let shapeProperties = null
+  const selectedExistingShape = store.getState().selectedExistingShape
+  if (selectedExistingShape != null) {
+    const shape = store.getState().shapesRoot
+      .find(element => element.id == selectedExistingShape)
+
+    if (shape != null && shape.node instanceof Shape) {
+      shapeProperties = <ShapeProperties
+        id={shape.id}
+        type={shape.type}
+        currentValue={shape.node.position.y}
+        handleChange={(value) => {
+          if (shape.node instanceof Shape) {
+            shape.node.position.y = value
+            store.setState({
+              ...store.getState(),
+            })
+          }
+        }}
+      />
+    }
+  }
+
+  console.log(shapeProperties)
 
   return <div className="ui">
     <Header
@@ -35,14 +73,22 @@ const Ui = () => {
         setGizmoActive(!gizmoActive)
       }}
     />
-    <ShapeSelect
-      shapeList={shapes}
-      selectedShape={selectedShape}
-      onSelectShape={(shape: Shape) => {
-        uiBindings.setActiveShape(selectedShape != shape ? shape : null)
-        setSelectedShape(selectedShape != shape ? shape : null)
-      }}
-    />
+    <div className="ui-main">
+      <ShapeSelect
+        shapeList={shapes}
+        selectedShape={selectedShape}
+        onSelectShape={(shape: Shape) => {
+          uiBindings.setActiveShape(selectedShape != shape ? shape : null)
+          setSelectedShape(selectedShape != shape ? shape : null)
+        }}
+      />
+      <ShapeList
+        shapeList={uiStore.shapesRoot}
+        selectedShapeId={uiStore.selectedExistingShape}
+        onSelectShape={(id: string) => setSelectedExistingShape(id)}
+      />
+      {shapeProperties}
+    </div>
   </div>
 }
 

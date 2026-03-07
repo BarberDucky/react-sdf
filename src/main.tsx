@@ -1,7 +1,7 @@
 import { Camera } from "./camera"
 import { initializeCanvas, resizeCanvasToDisplaySize } from "./canvas/canvas-utils"
 import KeyboardMovementManager from "./keyboard-movement-manager"
-import { ShapeController } from "./model/shape-controller"
+import { FlatShapeListEntry, ShapeController } from "./model/shape-controller"
 import MouseMovementManager from "./mouse-movement-manager"
 // import { SDFReactCanvas } from "./react/react-renderer"
 import { SdfRenderer } from './renderers/sdf-renderer'
@@ -15,6 +15,7 @@ import { SDFElementsObject } from "./react/reconciler"
 import { createRoot } from "react-dom/client"
 import { createContext } from "react"
 import { Store } from "./store"
+import { Operation, Shape } from "./model/shape-tree"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -25,11 +26,15 @@ const mouseMovementManager = new MouseMovementManager(canvas)
 interface AppStoreModel {
   isGizmoEnabled: boolean
   selectedShape: 'sphere' | 'box' | null
+  shapesRoot: Array<FlatShapeListEntry>
+  selectedExistingShape: string | null
 }
 
 export const store = new Store<AppStoreModel>({
   isGizmoEnabled: true,
   selectedShape: null,
+  shapesRoot: shapeController.flatShapeList,
+  selectedExistingShape: null,
 })
 
 const webGlContext = new WebGlContext(
@@ -39,14 +44,6 @@ const webGlContext = new WebGlContext(
 )
 
 class UiBindings extends AbstractUiBindings {
-  override createSphere(position: Point3, radius: number, color: Point3) {
-    shapeController.addSphere(position, radius, color)
-  }
-
-  override createBox(position: Point3, dimensions: Point3, color: Point3) {
-    shapeController.addBox(position, dimensions, color)
-  }
-
   override setActiveShape(shape: "sphere" | "box" | null): void {
     store.setState({
       ...store.getState(),
@@ -88,6 +85,7 @@ mouseMovementManager.addClickCallback(position => {
   store.setState({
     ...store.getState(),
     selectedShape: null,
+    shapesRoot: shapeController.flatShapeList,
   })
 })
 
@@ -110,7 +108,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
+  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)

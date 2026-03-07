@@ -3,6 +3,9 @@ import { Shape } from "./shape-tree";
 import { Visitor } from "./visitor";
 
 export class Sphere extends Shape {
+  
+  type = 'Sphere'
+  
   constructor(
     public id: string,
     public position: Point3,
@@ -19,6 +22,9 @@ export class Sphere extends Shape {
 }
 
 export class Box extends Shape {
+  
+  type = 'Box'
+  
   constructor(
     public id: string,
     public position: Point3,

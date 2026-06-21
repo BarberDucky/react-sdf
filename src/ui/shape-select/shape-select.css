@@ -1,0 +1,10 @@
+.shape-select {
+  width: fit-content;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-right: 2px solid #ddd;
+  align-items: center;
+}

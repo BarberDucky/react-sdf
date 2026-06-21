@@ -33,3 +33,8 @@ export function ConeIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export type ShapeIconType =
+  | typeof SphereIcon
+  | typeof CubeIcon
+  | typeof ConeIcon

@@ -1,5 +1,5 @@
 import { useContext, useState, useSyncExternalStore } from "react"
-import ShapeSelect from "./shape-select"
+import ShapeSelect from "./shape-select/shape-select"
 import Header from "./header"
 import './ui.css'
 import { store, UiContext } from "../main"
@@ -7,7 +7,7 @@ import ShapeList from "./shape-list"
 import ShapeProperties from "./shape-properties"
 import { Shape } from "../model/shape-tree"
 
-export type Shape = 'sphere' | 'box'
+export type UiShape = 'sphere' | 'box'
 
 const Ui = () => {
 
@@ -17,14 +17,14 @@ const Ui = () => {
 
   const [gizmoActive, setGizmoActive] = useState<boolean>(true)
 
-  const shapes: Array<{ type: Shape, label: string }> = [
+  const shapes: Array<{ type: UiShape, label: string }> = [
     { type: 'sphere', label: 'Sphere' },
     { type: 'box', label: 'Box' },
   ]
 
   const selectedShape = uiStore.selectedShape
 
-  function setSelectedShape(selectedShape: Shape | null) {
+  function setSelectedShape(selectedShape: UiShape | null) {
     store.setState({
       ...uiStore,
       selectedShape,
@@ -77,7 +77,7 @@ const Ui = () => {
       <ShapeSelect
         shapeList={shapes}
         selectedShape={selectedShape}
-        onSelectShape={(shape: Shape) => {
+        onSelectShape={(shape: UiShape) => {
           uiBindings.setActiveShape(selectedShape != shape ? shape : null)
           setSelectedShape(selectedShape != shape ? shape : null)
         }}

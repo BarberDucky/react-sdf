@@ -19,7 +19,11 @@ const ShapeSelect = (props: {
 
   return (
     <div className="shape-select">
-      {shapeButtons}
+      <div className="shape-select-header">
+        <h3>Shapes</h3>
+        <span>Build something fun!</span>
+      </div>
+      { shapeButtons }
     </div>
   )
 }

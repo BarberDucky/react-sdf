@@ -1,10 +1,36 @@
 .shape-select {
-  width: fit-content;
+  width: 200px;
   height: 100%;
-  background-color: white;
+  background-color: #eef4ff;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  border-right: 2px solid #ddd;
+  border-right: 1px solid #cec6ad;
   align-items: center;
+}
+
+.shape-select-header {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.shape-select-header h3 {
+  font-size: 20px;
+  font-family: Plus Jakarta Sans;
+  color: #6d5e00;
+  margin: 0;
+}
+
+.shape-select-header span {
+  font-size: 12px;
+  font-family: Plus Jakarta Sans;
+  color: #4b4734;
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.shape-select button {
+  width: 100%;
 }

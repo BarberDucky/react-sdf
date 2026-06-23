@@ -9,7 +9,7 @@ const Header = (props: {
       <h1 className="header-title">React SDF Renderer</h1>
       <div className='gizmo-button-container'>
         <button
-          className={`gizmo-button ${props.gizmoActive ? 'selected' : ''}`}
+          className={`gizmo-button ${props.gizmoActive ? 'gizmo-selected' : ''}`}
           onClick={props.onGizmoToggle}
         >
           Gizmo

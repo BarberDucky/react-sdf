@@ -1,7 +1,5 @@
-import { Shape } from "./ui"
 import './shape-list.css'
-import { Operation } from "../model/shape-tree"
-import { FlatShapeListEntry } from "../model/shape-controller"
+import { FlatShapeListEntry } from "../../model/shape-controller"
 
 const ShapeList = (props: { 
   selectedShapeId: string | null,

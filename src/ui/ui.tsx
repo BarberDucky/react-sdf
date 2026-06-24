@@ -3,8 +3,9 @@ import ShapeSelect from "./shape-select/shape-select"
 import Header from "./header"
 import './ui.css'
 import { store, UiContext } from "../main"
-import ShapeList from "./shape-list"
-import ShapeProperties from "./shape-properties"
+import ShapeList from "./shape-list-props/shape-list"
+import ShapeProperties from "./shape-list-props/shape-properties"
+import ShapeListProps from "./shape-list-props/shape-list-props"
 import { Shape } from "../model/shape-tree"
 
 export type UiShape = 'sphere' | 'box'
@@ -82,12 +83,11 @@ const Ui = () => {
           setSelectedShape(selectedShape != shape ? shape : null)
         }}
       />
-      <ShapeList
+      <ShapeListProps
         shapeList={uiStore.shapesRoot}
         selectedShapeId={uiStore.selectedExistingShape}
         onSelectShape={(id: string) => setSelectedExistingShape(id)}
       />
-      {shapeProperties}
     </div>
   </div>
 }

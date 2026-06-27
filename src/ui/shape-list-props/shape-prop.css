@@ -1,0 +1,19 @@
+.shape-prop {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.shape-prop-label {
+  color: #4b4734;
+  font-family: Plus Jakarta Sans;
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.shape-prop-inputs {
+
+}

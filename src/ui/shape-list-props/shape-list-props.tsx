@@ -36,7 +36,6 @@ const ShapeListProps = (props: {
 
   return (
     <div className="shape-list-props">
-      {/* {shapeButtons} */}
       <Card title="Combination Tree" icon={<TreeIcon />}> 
         {shapeButtons}
       </Card>

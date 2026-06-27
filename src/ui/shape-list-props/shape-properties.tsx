@@ -1,23 +1,9 @@
-import { useState } from 'react'
+import ColorInput from '../inputs/color-input'
+import NumberInput from '../inputs/number-input'
+import RangeInput from '../inputs/range-input'
 import './shape-properties.css'
 
 export type InputType = 'number' | 'color' | 'point2' | 'point3'
-
-const NumberInput = (props: {
-  name: string,
-  value: number,
-  onChange: (value: number) => void,
-}) => {
-  return (
-    <div>
-      <span>{props.name}</span>
-      <input
-        type="number"
-        step={0.1}
-        onChange={(e) => props.onChange(Number.parseFloat(e.target.value))} />
-    </div>
-  )
-}
 
 const ShapeProperties = (props: {
   id: string,
@@ -28,12 +14,23 @@ const ShapeProperties = (props: {
 
   return <div className="shape-properties">
     {props.id}
-    <br/>
+    <br />
     {props.type}
     <NumberInput
-      name="height"
+      label='Y'
+      labelColor='#a43073'
       value={props.currentValue}
-      onChange={(value) => props.handleChange(value)}
+      onValueChange={(value) => props.handleChange(value)}
+    />
+    <RangeInput
+      labelColor='#0060ac'
+      range={{ min: 0, max: 100 }}
+      value={50}
+      onValueChange={(value) => props.handleChange(value)}
+    />
+    <ColorInput
+      value='#ff0000'
+      onValueChange={(value) => console.log('Color changed to', value)}
     />
   </div>
 }

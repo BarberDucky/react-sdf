@@ -1,0 +1,28 @@
+.number-input {
+	display: flex;
+	flex-direction: column;
+	background-color: #eef4ff;
+	align-items: center;
+	padding: 1em;
+	border-radius: 8px;
+	width: 60px;
+  height: 40px;
+  font-family: Plus Jakarta Sans;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.number-input > input {
+	margin-top: 10px;
+	background-color: transparent;
+	border: none;
+	text-align: center;
+	width: 100%;
+	margin-left: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.number-input > input:focus {
+    outline: none;
+}

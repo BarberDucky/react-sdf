@@ -32,21 +32,21 @@ const ShapeListProps = () => {
     </button>
   ))
 
-  const shapeProps = <ShapeProperties
-    id={'1'}
-    type={'sphere'}
-    currentValue={1}
-    handleChange={() => { }}
-  />
+  const shapeProps = <Card title="Properties" icon={<TuneIcon />}>
+    <ShapeProperties
+      id={'1'}
+      type={'sphere'}
+      currentValue={1}
+      handleChange={() => { }}
+    />
+  </Card>
 
   return (
     <div className="shape-list-props">
       <Card title="Combination Tree" icon={<TreeIcon />}>
         {shapeButtons}
       </Card>
-      <Card title="Properties" icon={<TuneIcon />}>
-        {shapeProps}
-      </Card>
+      {uiStore.selectedExistingShape != null ? shapeProps : null}
     </div>
   )
 }

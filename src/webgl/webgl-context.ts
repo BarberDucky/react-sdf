@@ -92,6 +92,11 @@ export class WebGlContext {
   }
 
   public recompileFragmentShader(source: string) {
+    const oldSource = this._gl.getShaderSource(this._fragmentShader)
+    if (oldSource == source) {
+      return this._program
+    }
+
     this._gl.detachShader(this._program, this._fragmentShader)
     this._gl.deleteShader(this._fragmentShader)
 

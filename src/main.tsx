@@ -86,7 +86,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
+  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)

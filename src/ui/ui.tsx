@@ -1,9 +1,8 @@
-import { useContext, useState, useSyncExternalStore } from "react"
+import { useSyncExternalStore } from "react"
 import ShapeSelect from "./shape-select/shape-select"
 import Header from "./header"
 import './ui.css'
-import { store, UiContext } from "../main"
-import ShapeList from "./shape-list-props/shape-list"
+import { store } from "../main"
 import ShapeProperties from "./shape-list-props/shape-properties"
 import ShapeListProps from "./shape-list-props/shape-list-props"
 import { Shape } from "../model/shape-tree"
@@ -12,11 +11,7 @@ export type UiShape = 'sphere' | 'box'
 
 const Ui = () => {
 
-  const uiBindings = useContext(UiContext)
-
   const uiStore = useSyncExternalStore(store.subscribe, store.getState)
-
-  const [gizmoActive, setGizmoActive] = useState<boolean>(true)
 
   const shapes: Array<{ type: UiShape, label: string }> = [
     { type: 'sphere', label: 'Sphere' },
@@ -38,6 +33,13 @@ const Ui = () => {
       selectedExistingShape: selectedExistingShape == uiStore.selectedExistingShape
         ? null
         : selectedExistingShape,
+    })
+  }
+
+  function toggleGizmo(): void {
+    store.setState({
+      ...uiStore,
+      isGizmoEnabled: !uiStore.isGizmoEnabled,
     })
   }
 
@@ -68,10 +70,9 @@ const Ui = () => {
 
   return <div className="ui">
     <Header
-      gizmoActive={gizmoActive}
+      gizmoActive={uiStore.isGizmoEnabled}
       onGizmoToggle={() => {
-        uiBindings.toggleGizmo()
-        setGizmoActive(!gizmoActive)
+        toggleGizmo()
       }}
     />
     <div className="ui-main">
@@ -79,12 +80,11 @@ const Ui = () => {
         shapeList={shapes}
         selectedShape={selectedShape}
         onSelectShape={(shape: UiShape) => {
-          uiBindings.setActiveShape(selectedShape != shape ? shape : null)
           setSelectedShape(selectedShape != shape ? shape : null)
         }}
       />
       <ShapeListProps
-        shapeList={uiStore.shapesRoot}
+        shapeList={store.getState().shapesRoot}
         selectedShapeId={uiStore.selectedExistingShape}
         onSelectShape={(id: string) => setSelectedExistingShape(id)}
       />

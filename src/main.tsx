@@ -6,7 +6,6 @@ import MouseMovementManager from "./mouse-movement-manager"
 // import { SDFReactCanvas } from "./react/react-renderer"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
-import { AbstractUiBindings } from "./ui/bindings"
 import Ui from "./ui/ui"
 import { Point3 } from "./utils"
 import { Uniform2f, Uniform3f, WebGlContext } from "./webgl/webgl-context"
@@ -42,22 +41,6 @@ const webGlContext = new WebGlContext(
   sdfRenderer.generateVertexShaderString(),
   sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled)
 )
-
-class UiBindings extends AbstractUiBindings {
-  override setActiveShape(shape: "sphere" | "box" | null): void {
-    store.setState({
-      ...store.getState(),
-      selectedShape: shape,
-    })
-  }
-
-  override toggleGizmo(): void {
-    store.setState({
-      ...store.getState(),
-      isGizmoEnabled: !store.getState().isGizmoEnabled,
-    })
-  }
-}
 
 const camera = new Camera(
   { x: 3, y: 3, z: -3 },
@@ -108,7 +91,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
+  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -154,10 +137,7 @@ declare module 'react'
 // )
 
 const reactRoot = createRoot(document.getElementById('reactRoot')!)
-export const UiContext = createContext<UiBindings>(new UiBindings())
 
 reactRoot.render(
-  <UiContext.Provider value={new UiBindings()}>
     <Ui />
-  </UiContext.Provider>
 )

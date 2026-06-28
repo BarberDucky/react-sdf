@@ -1,19 +1,29 @@
+import { useSyncExternalStore } from "react"
 import { UiShape } from "../ui"
 import { ShapeSelectButton } from "./button"
 import './shape-select.css'
+import { store } from "../../main"
 
-const ShapeSelect = (props: {
-  selectedShape: UiShape | null,
-  onSelectShape: (shape: UiShape) => void
-  shapeList: Array<{ type: UiShape, label: string }>
-}) => {
+const ShapeSelect = () => {
 
-  const shapeButtons = props.shapeList.map(shape => (
+  const uiStore = useSyncExternalStore(store.subscribe, store.getState)
+
+  const shapes: Array<{ type: UiShape, label: string }> = [
+    { type: 'sphere', label: 'Sphere' },
+    { type: 'box', label: 'Box' },
+  ]
+
+  const shapeButtons = shapes.map(shape => (
     <ShapeSelectButton
       key={shape.type}
       shape={shape.type}
-      isSelected={shape.type === props.selectedShape}
-      onClick={props.onSelectShape}
+      isSelected={shape.type === uiStore.selectedShape}
+      onClick={(selectedShape: UiShape | null) => {
+        store.setState({
+          ...uiStore,
+          selectedShape,
+        })
+      }}
     />
   ))
 
@@ -23,7 +33,7 @@ const ShapeSelect = (props: {
         <h3>Shapes</h3>
         <span>Build something fun!</span>
       </div>
-      { shapeButtons }
+      {shapeButtons}
     </div>
   )
 }

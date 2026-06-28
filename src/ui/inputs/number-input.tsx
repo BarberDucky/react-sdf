@@ -12,6 +12,7 @@ function NumberInput(props: {
 			<input
 				type="number"
 				value={props.value}
+				step={0.1}
 				onChange={(e) => {
 					props.onValueChange(Number.parseFloat(e.target.value));
 				}}

@@ -27,7 +27,6 @@ function ColorInput(props: {
 				value={props.value}
 				onChange={(e) => {
 					props.onValueChange(e.target.value);
-					console.log("change", e.target.value);
 				}}
 			/>
 		</div>

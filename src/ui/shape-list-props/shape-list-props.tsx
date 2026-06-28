@@ -33,12 +33,7 @@ const ShapeListProps = () => {
   ))
 
   const shapeProps = <Card title="Properties" icon={<TuneIcon />}>
-    <ShapeProperties
-      id={'1'}
-      type={'sphere'}
-      currentValue={1}
-      handleChange={() => { }}
-    />
+    <ShapeProperties />
   </Card>
 
   return (

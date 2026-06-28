@@ -3,18 +3,13 @@ import { initializeCanvas, resizeCanvasToDisplaySize } from "./canvas/canvas-uti
 import KeyboardMovementManager from "./keyboard-movement-manager"
 import { FlatShapeListEntry, ShapeController } from "./model/shape-controller"
 import MouseMovementManager from "./mouse-movement-manager"
-// import { SDFReactCanvas } from "./react/react-renderer"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import Ui from "./ui/ui"
-import { Point3 } from "./utils"
 import { Uniform2f, Uniform3f, WebGlContext } from "./webgl/webgl-context"
 
-import { SDFElementsObject } from "./react/reconciler"
 import { createRoot } from "react-dom/client"
-import { createContext } from "react"
 import { Store } from "./store"
-import { Operation, Shape } from "./model/shape-tree"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -47,7 +42,7 @@ const camera = new Camera(
   { x: 0, y: 0, z: 0 }
 )
 
-mouseMovementManager.addClickCallback(position => {
+mouseMovementManager.addClickCallback(() => {
   const activeShape = store.getState().selectedShape
 
   if (activeShape === 'sphere') {
@@ -91,7 +86,7 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
+  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -105,36 +100,6 @@ const animate = () => {
 }
 
 animate()
-
-// const sdfReactCanvas = new SDFReactCanvas(shapeController)
-
-declare module 'react'
-{
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements extends SDFElementsObject { }
-  }
-}
-
-// sdfReactCanvas.render(
-//   <smoothUnion smoothness={0.5}>
-//     <sphere
-//       position={{ x: 0, y: 0, z: 1 }}
-//       color={{ x: 1, y: 0, z: 0 }}
-//       radius={1}
-//     />
-//     <box
-//       position={{ x: 0, y: 0, z: 0 }}
-//       color={{ x: 0, y: 1, z: 0 }}
-//       dimensions={{ x: 1, y: 1, z: 1 }}
-//     /> 
-//     <sphere
-//       position={{ x: 0, y: 0, z: -1 }}
-//       color={{ x: 0, y: 0, z: 1 }}
-//       radius={1}
-//     />
-//   </smoothUnion>
-// )
 
 const reactRoot = createRoot(document.getElementById('reactRoot')!)
 

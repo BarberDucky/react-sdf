@@ -31,7 +31,7 @@ const ShapeListProps = (props: {
         id={'1'}
         type={'sphere'}
         currentValue={1}
-        handleChange={(value) => {}}
+        handleChange={() => {}}
       />
 
   return (

@@ -1,8 +1,9 @@
 import { Point2, Point3 } from "../utils"
 
-type UniformValue = 
+type UniformValue =
   | { type: '2f', value: Point2 }
   | { type: '3f', value: Point3 }
+  | { type: 'bool', value: boolean }
 
 export interface Uniform {
   updateLocation: (value: WebGLUniformLocation) => void
@@ -11,15 +12,15 @@ export interface Uniform {
 
 export class Uniform2f implements Uniform {
   constructor(
-    private _location: WebGLUniformLocation, 
+    private _location: WebGLUniformLocation,
     private _value: Point2,
-  ) {}
+  ) { }
 
-  updateLocation (value: WebGLUniformLocation) {
+  updateLocation(value: WebGLUniformLocation) {
     this._location = (value)
   }
 
-  updateValue (value: Point2) {
+  updateValue(value: Point2) {
     this._value = value
   }
 
@@ -30,20 +31,39 @@ export class Uniform2f implements Uniform {
 
 export class Uniform3f implements Uniform {
   constructor(
-    private _location: WebGLUniformLocation, 
+    private _location: WebGLUniformLocation,
     private _value: Point3,
-  ) {}
+  ) { }
 
-  updateLocation (value: WebGLUniformLocation) {
+  updateLocation(value: WebGLUniformLocation) {
     this._location = (value)
   }
 
-  updateValue (value: Point3) {
+  updateValue(value: Point3) {
     this._value = value
   }
 
   accept(gl: WebGL2RenderingContext) {
     gl.uniform3f(this._location, this._value.x, this._value.y, this._value.z)
+  }
+}
+
+export class UniformBool implements Uniform {
+  constructor(
+    private _location: WebGLUniformLocation,
+    private _value: boolean,
+  ) { }
+
+  updateLocation(value: WebGLUniformLocation) {
+    this._location = (value)
+  }
+
+  updateValue(value: boolean) {
+    this._value = value
+  }
+
+  accept(gl: WebGL2RenderingContext) {
+    gl.uniform1i(this._location, this._value ? 1 : 0)
   }
 }
 
@@ -71,7 +91,7 @@ export class WebGlContext {
   public requestDraw() {
     for (const uniform of this._uniforms.values()) {
       uniform.accept(this._gl)
-    } 
+    }
 
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6)
   }
@@ -82,11 +102,13 @@ export class WebGlContext {
 
   public registerUniform(name: string, value: UniformValue): Uniform {
     const location = this._gl.getUniformLocation(this._program, name)
-    
+
     const uniform = value.type == '2f'
       ? new Uniform2f(location!, value.value)
-      : new Uniform3f(location!, value.value)
-    
+      : value.type == '3f'
+        ? new Uniform3f(location!, value.value)
+        : new UniformBool(location!, value.value)
+
     this._uniforms.set(name, uniform)
     return uniform
   }

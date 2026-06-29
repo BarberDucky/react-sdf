@@ -15,7 +15,7 @@ export class SdfRenderer {
       }`
   }
 
-  generateFragmentShaderString(root: Operation, gizmoEnabled: boolean) {
+  generateFragmentShaderString(root: Operation) {
     const objectsString = root.accept(this.visitor, 'res')
 
     return dedent`#version 300 es
@@ -26,6 +26,7 @@ export class SdfRenderer {
       uniform vec2 iResolution;
       uniform vec3 iCameraOrigin;
       uniform vec3 iLookAt;
+      uniform bool iIsGizmoEnabled;
 
       struct MaterialDist {
         vec3 color;
@@ -104,12 +105,9 @@ export class SdfRenderer {
         res.color = zAxisRepeat < res.dist ? vec3(0.8) : res.color;
         res.dist = opUnion(res.dist, zAxisRepeat);
 
+        // AXES
 
-        ${!gizmoEnabled 
-          ? ''  
-          : `
-          // AXES
-
+        if (iIsGizmoEnabled) {
           res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
           res.dist = opUnion(res.dist, xAxis);
 
@@ -118,7 +116,6 @@ export class SdfRenderer {
 
           res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
           res.dist = opUnion(res.dist, zAxis);
-        `
         }
 
         // SHAPES

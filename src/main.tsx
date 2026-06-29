@@ -6,7 +6,7 @@ import MouseMovementManager from "./mouse-movement-manager"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import Ui from "./ui/ui"
-import { Uniform2f, Uniform3f, WebGlContext } from "./webgl/webgl-context"
+import { Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
 
 import { createRoot } from "react-dom/client"
 import { Store } from "./store"
@@ -34,7 +34,7 @@ export const store = new Store<AppStoreModel>({
 const webGlContext = new WebGlContext(
   canvas,
   sdfRenderer.generateVertexShaderString(),
-  sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled)
+  sdfRenderer.generateFragmentShaderString(shapeController.rootOperation)
 )
 
 const camera = new Camera(
@@ -84,9 +84,10 @@ mouseMovementManager.addWheelCallback(deltaWheel => {
 const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }) as Uniform2f
 const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
+const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
 
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation, store.getState().isGizmoEnabled))
+  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -94,6 +95,7 @@ const animate = () => {
   uResolution.updateValue({ x: canvas.width, y: canvas.height })
   uCameraOrigin.updateValue({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
   uLookAt.updateValue({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
+  uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)

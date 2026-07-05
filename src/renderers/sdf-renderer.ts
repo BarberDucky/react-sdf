@@ -206,15 +206,15 @@ export class SdfRenderer {
 
         vec3 col = vec3(0.);
 
-        for(int y = 0; y < 2; y++) {
-        for(int x = 0; x < 2; x++) {
-            vec2 off = vec2(float(x),float(y))/2.;
-            vec2 xy = (-iResolution.xy+2.0*(gl_FragCoord.xy+off)) / iResolution.y;
-        	  col += render(xy)*0.25;
-          }
-        }
+        // for(int y = 0; y < 2; y++) {
+        // for(int x = 0; x < 2; x++) {
+        //     vec2 off = vec2(float(x),float(y))/2.;
+        //     vec2 xy = (-iResolution.xy+2.0*(gl_FragCoord.xy+off)) / iResolution.y;
+        // 	  col += render(xy)*0.25;
+        //   }
+        // }
 
-        // col = render(uv);
+        col = render(uv);
 
         outColor = vec4(col, 1.);
       }`

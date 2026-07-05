@@ -1,6 +1,7 @@
 import { Point2, Point3 } from "../utils"
 
 type UniformValue =
+  | { type: '1i', value: number }
   | { type: '2f', value: Point2 }
   | { type: '3f', value: Point3 }
   | { type: 'bool', value: boolean }
@@ -8,6 +9,25 @@ type UniformValue =
 export interface Uniform {
   updateLocation: (value: WebGLUniformLocation) => void
   accept: (gl: WebGL2RenderingContext) => void
+}
+
+export class Uniform1f implements Uniform {
+  constructor(
+    private _location: WebGLUniformLocation,
+    private _value: number,
+  ) { }
+
+  updateLocation(value: WebGLUniformLocation) {
+    this._location = (value)
+  }
+
+  updateValue(value: number) {
+    this._value = value
+  }
+
+  accept(gl: WebGL2RenderingContext) {
+    gl.uniform1i(this._location, this._value)
+  }
 }
 
 export class Uniform2f implements Uniform {
@@ -107,7 +127,9 @@ export class WebGlContext {
       ? new Uniform2f(location!, value.value)
       : value.type == '3f'
         ? new Uniform3f(location!, value.value)
-        : new UniformBool(location!, value.value)
+        : value.type == 'bool'
+          ? new UniformBool(location!, value.value)
+          : new Uniform1f(location!, value.value)
 
     this._uniforms.set(name, uniform)
     return uniform

@@ -11,7 +11,7 @@ export interface Uniform {
   accept: (gl: WebGL2RenderingContext) => void
 }
 
-export class Uniform1f implements Uniform {
+export class Uniform1i implements Uniform {
   constructor(
     private _location: WebGLUniformLocation,
     private _value: number,
@@ -94,7 +94,11 @@ export class WebGlContext {
   private _fragmentShader: WebGLShader
   private _program: WebGLProgram
 
+  private _maxTextureCount = 4
+
   private _uniforms: Map<string, Uniform> = new Map()
+  private _textureUniforms: Array<WebGLUniformLocation> = []
+  private _textures: Array<WebGLTexture> = []
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -106,12 +110,15 @@ export class WebGlContext {
     this._fragmentShader = this.createShader(this._gl.FRAGMENT_SHADER, fragmentShaderSource)
     this._program = this.createProgram(this._vertexShader, this._fragmentShader)
     this.initializeViewport()
+    this.initializeTextureUniforms()
   }
 
   public requestDraw() {
     for (const uniform of this._uniforms.values()) {
       uniform.accept(this._gl)
     }
+
+    this.assignTexturesForDrawing()
 
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6)
   }
@@ -129,7 +136,7 @@ export class WebGlContext {
         ? new Uniform3f(location!, value.value)
         : value.type == 'bool'
           ? new UniformBool(location!, value.value)
-          : new Uniform1f(location!, value.value)
+          : new Uniform1i(location!, value.value)
 
     this._uniforms.set(name, uniform)
     return uniform
@@ -158,6 +165,33 @@ export class WebGlContext {
     const errorInfo = this._gl.getProgramInfoLog(this._program)
     this._gl.deleteProgram(this._program)
     throw new Error(`Error while linking program. Full info log: ${errorInfo}`)
+  }
+
+  public createAndSetTexture(data: Float32Array) {
+    const newTexture = this._gl.createTexture()
+    this._textures.push(newTexture)
+    this.setTexture(newTexture!, data)
+    return newTexture
+  }
+
+  public setTexture(texture: WebGLTexture, data: Float32Array) {
+    this._gl.activeTexture(this._gl.TEXTURE0)
+    this._gl.bindTexture(this._gl.TEXTURE_2D, texture)
+
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST)
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST)
+
+    this._gl.texImage2D(
+      this._gl.TEXTURE_2D,
+      0,
+      this._gl.RGBA32F,
+      1,
+      1,
+      0,
+      this._gl.RGBA,
+      this._gl.FLOAT,
+      data
+    )
   }
 
   private initializeViewport() {
@@ -243,6 +277,21 @@ export class WebGlContext {
     this._uniforms.forEach((value, key) => {
       value.updateLocation(this._gl.getUniformLocation(this._program, key)!)
     })
+  }
+
+  private initializeTextureUniforms() {
+    for (let i = 0; i < this._maxTextureCount; i++) {
+      const location = this._gl.getUniformLocation(this._program, `iSampler${i + 1}`)
+      this._gl.uniform1i(location, i + 1)
+      this._textureUniforms.push(location!)
+    }
+  }
+
+  private assignTexturesForDrawing() {
+    for (let i = 0; i < this._maxTextureCount; i++) {
+      this._gl.activeTexture(this._gl.TEXTURE0 + i + 1)
+      this._gl.bindTexture(this._gl.TEXTURE_2D, this._textures[i])
+    }
   }
 
 }

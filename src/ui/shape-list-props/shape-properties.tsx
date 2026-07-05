@@ -74,34 +74,6 @@ const ShapeProperties = () => {
         <NumberInput
           label='Z'
           labelColor='#0060ac'
-          value={shapeData.node.position.z}
-          onValueChange={(value) => {
-            if (Number.isNaN(value)) return
-            if (!(shapeData?.node instanceof Shape)) return
-            shapeData.node.position.z = value
-            store.setState({ ...uiStore })
-          }}
-        />
-      </div>
-    </ShapeProp>
-
-    <ShapeProp label='Rotation'>
-      <div className="shape-prop-point3">
-        <NumberInput
-          label='X'
-          labelColor='#6d5e00'
-          value={0}
-          onValueChange={(value) => console.log('Rotation', value)}
-        />
-        <NumberInput
-          label='Y'
-          labelColor='#a43073'
-          value={0}
-          onValueChange={(value) => console.log('Rotation', value)}
-        />
-        <NumberInput
-          label='Z'
-          labelColor='#0060ac'
           value={0}
           onValueChange={(value) => console.log('Rotation', value)}
         />

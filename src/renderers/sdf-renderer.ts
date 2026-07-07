@@ -28,6 +28,11 @@ export class SdfRenderer {
       uniform vec3 iLookAt;
       uniform bool iIsGizmoEnabled;
 
+      uniform sampler2D iSampler1;
+      uniform sampler2D iSampler2;
+      uniform sampler2D iSampler3;
+      uniform sampler2D iSampler4;
+
       struct MaterialDist {
         vec3 color;
         bool isLit;
@@ -120,8 +125,35 @@ export class SdfRenderer {
 
         // SHAPES
 
-        ${objectsString}
-        res.dist = opUnion(res.dist, root.dist);
+        vec4 t0 = texelFetch(iSampler1, ivec2(0, 0), 0);
+        vec4 t1 = texelFetch(iSampler1, ivec2(1, 0), 0);
+        vec4 t2 = texelFetch(iSampler1, ivec2(2, 0), 0);
+
+        MaterialDist shp123 = MaterialDist(
+          t2.rgb,
+          true,
+          sdSphere(p - t1.xyz, t0.y)
+        );
+
+        res.color = shp123.dist < res.dist ? shp123.color : res.color;
+        res.isLit = shp123.dist < res.dist ? shp123.isLit : res.isLit;
+
+        res.dist = opUnion(res.dist, shp123.dist);
+
+        vec4 t3 = texelFetch(iSampler1, ivec2(3, 0), 0);
+        vec4 t4 = texelFetch(iSampler1, ivec2(4, 0), 0);
+        vec4 t5 = texelFetch(iSampler1, ivec2(5, 0), 0);
+
+        MaterialDist box123 = MaterialDist(
+          t5.rgb,
+          true,
+          sdBox(p - t4.xyz, t3.yzw)
+        );
+
+        res.color = box123.dist < res.dist ? box123.color : res.color;
+        res.isLit = box123.dist < res.dist ? box123.isLit : res.isLit;
+
+        res.dist = opUnion(res.dist, box123.dist);
 
         return res;
       }

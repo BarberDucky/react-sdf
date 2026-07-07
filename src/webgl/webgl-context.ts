@@ -167,7 +167,7 @@ export class WebGlContext {
     throw new Error(`Error while linking program. Full info log: ${errorInfo}`)
   }
 
-  public createAndSetTexture(data: Float32Array) {
+  public createAndSetTexture(data: Float32Array, width: number, height: number) {
     const newTexture = this._gl.createTexture()
 
     if (newTexture == null) {
@@ -176,11 +176,11 @@ export class WebGlContext {
     }
 
     this._textures.push(newTexture)
-    this.setTexture(newTexture!, data)
+    this.setTexture(newTexture!, data, width, height)
     return newTexture
   }
 
-  public setTexture(texture: WebGLTexture, data: Float32Array) {
+  public setTexture(texture: WebGLTexture, data: Float32Array, width: number, height: number) {
     this._gl.activeTexture(this._gl.TEXTURE0)
     this._gl.bindTexture(this._gl.TEXTURE_2D, texture)
 
@@ -191,8 +191,8 @@ export class WebGlContext {
       this._gl.TEXTURE_2D,
       0,
       this._gl.RGBA32F,
-      1,
-      1,
+      width,
+      height,
       0,
       this._gl.RGBA,
       this._gl.FLOAT,

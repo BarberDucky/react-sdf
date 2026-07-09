@@ -3,9 +3,11 @@ import { Box, Sphere } from "../model/shapes";
 import { Visitor } from "../model/visitor";
 import { dedent, floatToGlslFloat, point3ToVec3 } from "../utils";
 
-export class SdfShapeVisitor extends Visitor {
+export class SdfShapeVisitor extends Visitor<string, { root: string }> {
 
-  public visitSphere(s: Sphere, root: string): string {
+  public visitSphere(s: Sphere, extra: { root: string }): string {
+    const { root } = extra
+
     return dedent`
       MaterialDist ${s.id} = MaterialDist(
         ${point3ToVec3(s.color)},
@@ -17,7 +19,9 @@ export class SdfShapeVisitor extends Visitor {
       ${root}.isLit = ${s.id}.dist < ${root}.dist ? ${s.id}.isLit : ${root}.isLit;`
   }
 
-  public visitBox(b: Box, root: string): string {
+  public visitBox(b: Box, extra: { root: string }): string {
+    const { root } = extra
+
     return dedent`
       MaterialDist ${b.id} = MaterialDist(
         ${point3ToVec3(b.color)},
@@ -29,32 +33,36 @@ export class SdfShapeVisitor extends Visitor {
       ${root}.isLit = ${b.id}.dist < ${root}.dist ? ${b.id}.isLit : ${root}.isLit;`
   }
 
-  public visitUnion(u: UnionOperation, root: string): string {
+  public visitUnion(u: UnionOperation, extra: { root: string }): string {
+    const { root } = extra
+
     return dedent`
       MaterialDist ${u.id} = MaterialDist(
         vec3(1.),
         true,
         1000.
       );` +
-    u.nodes
-    .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opUnion(${u.id}.dist, ${curr.id}.dist);`))
-    .join('') +
-    dedent`
+      u.nodes
+        .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opUnion(${u.id}.dist, ${curr.id}.dist);`))
+        .join('') +
+      dedent`
       ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;
       ${root}.isLit = ${u.id}.dist < ${root}.dist ? true : ${root}.isLit;`
   }
 
-  public visitSmoothUnion(u: SmoothUnionOperation, root: string): string {
-     return dedent`
+  public visitSmoothUnion(u: SmoothUnionOperation, extra: { root: string }): string {
+    const { root } = extra
+
+    return dedent`
       MaterialDist ${u.id} = MaterialDist(
         vec3(1.),
         true,
         1000.
       );` +
-    u.nodes
-    .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opSmoothUnion(${u.id}.dist, ${curr.id}.dist, ${u.smoothness});`))
-    .join('') +
-    dedent`
+      u.nodes
+        .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opSmoothUnion(${u.id}.dist, ${curr.id}.dist, ${u.smoothness});`))
+        .join('') +
+      dedent`
       ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;
       ${root}.isLit = ${u.id}.dist < ${root}.dist ? true : ${root}.isLit;`
   }

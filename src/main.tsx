@@ -10,8 +10,8 @@ import { Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-c
 
 import { createRoot } from "react-dom/client"
 import { Store } from "./store"
-import { extractBox, extractSphere } from "./renderers/texture-shape-data"
 import { Box, Sphere } from "./model/shapes"
+import { DataTextureVisitor } from "./renderers/data-texture-visitor"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -88,19 +88,25 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
 
-const sphereData = extractSphere(new Sphere(
+const dataTextureVisitor = new DataTextureVisitor()
+
+const sphere = new Sphere(
   'sph123',
   {x: 0, y: 1, z: 0},
   {x: 1, y: 0, z: 0},
   1
-))
+)
 
-const boxData = extractBox(new Box(
+const box = new Box(
   'box123',
   {x: 0, y: 1, z: 0},
   {x: 1, y: 0, z: 0},
   {x: 0.75, y: 0.5, z: 2},
-))
+)
+
+const sphereData = dataTextureVisitor.visitSphere(sphere)
+
+const boxData = dataTextureVisitor.visitBox(box)
 
 const data = new Float32Array(24)
 data.set([...sphereData])

@@ -16,7 +16,7 @@ export class SdfRenderer {
   }
 
   generateFragmentShaderString(root: Operation) {
-    const objectsString = root.accept(this.visitor, 'res')
+    const objectsString = root.accept(this.visitor, { root: 'res' })
 
     return dedent`#version 300 es
       precision highp float;

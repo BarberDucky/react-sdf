@@ -16,7 +16,7 @@ export class SdfRenderer {
   }
 
   generateFragmentShaderString(root: Operation) {
-    const objectsString = root.accept(this.visitor, 'res')
+    const objectsString = root.accept(this.visitor, { root: 'res'})
 
     return dedent`#version 300 es
       precision highp float;
@@ -125,14 +125,30 @@ export class SdfRenderer {
 
         // SHAPES
 
+
         vec4 t0 = texelFetch(iSampler1, ivec2(0, 0), 0);
         vec4 t1 = texelFetch(iSampler1, ivec2(1, 0), 0);
         vec4 t2 = texelFetch(iSampler1, ivec2(2, 0), 0);
 
-        MaterialDist shp123 = MaterialDist(
+        MaterialDist box123 = MaterialDist(
           t2.rgb,
           true,
-          sdSphere(p - t1.xyz, t0.y)
+          sdBox(p - t1.xyz, t0.yzw)
+        );
+
+        res.color = box123.dist < res.dist ? box123.color : res.color;
+        res.isLit = box123.dist < res.dist ? box123.isLit : res.isLit;
+
+        res.dist = opUnion(res.dist, box123.dist);
+
+        vec4 t3 = texelFetch(iSampler1, ivec2(3, 0), 0);
+        vec4 t4 = texelFetch(iSampler1, ivec2(4, 0), 0);
+        vec4 t5 = texelFetch(iSampler1, ivec2(5, 0), 0);
+
+        MaterialDist shp123 = MaterialDist(
+          t5.rgb,
+          true,
+          sdSphere(p - t4.xyz, t3.y)
         );
 
         res.color = shp123.dist < res.dist ? shp123.color : res.color;
@@ -140,20 +156,6 @@ export class SdfRenderer {
 
         res.dist = opUnion(res.dist, shp123.dist);
 
-        vec4 t3 = texelFetch(iSampler1, ivec2(3, 0), 0);
-        vec4 t4 = texelFetch(iSampler1, ivec2(4, 0), 0);
-        vec4 t5 = texelFetch(iSampler1, ivec2(5, 0), 0);
-
-        MaterialDist box123 = MaterialDist(
-          t5.rgb,
-          true,
-          sdBox(p - t4.xyz, t3.yzw)
-        );
-
-        res.color = box123.dist < res.dist ? box123.color : res.color;
-        res.isLit = box123.dist < res.dist ? box123.isLit : res.isLit;
-
-        res.dist = opUnion(res.dist, box123.dist);
 
         return res;
       }

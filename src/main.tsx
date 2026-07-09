@@ -12,6 +12,7 @@ import { createRoot } from "react-dom/client"
 import { Store } from "./store"
 import { Box, Sphere } from "./model/shapes"
 import { DataTextureVisitor } from "./renderers/data-texture-visitor"
+import { generateShaderTextures } from "./renderers/generate-shader-textures"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -92,16 +93,16 @@ const dataTextureVisitor = new DataTextureVisitor()
 
 const sphere = new Sphere(
   'sph123',
-  {x: 0, y: 1, z: 0},
-  {x: 1, y: 0, z: 0},
+  { x: 0, y: 1, z: 0 },
+  { x: 1, y: 0, z: 0 },
   1
 )
 
 const box = new Box(
   'box123',
-  {x: 0, y: 1, z: 0},
-  {x: 1, y: 0, z: 0},
-  {x: 0.75, y: 0.5, z: 2},
+  { x: 0, y: 1, z: 0 },
+  { x: 1, y: 0, z: 0 },
+  { x: 0.75, y: 0.5, z: 2 },
 )
 
 const sphereData = dataTextureVisitor.visitSphere(sphere)
@@ -112,7 +113,15 @@ const data = new Float32Array(24)
 data.set([...sphereData])
 data.set([...boxData], boxData.length)
 
-const shapesTexture = webGlContext.createAndSetTexture(data, 6, 1)
+// const shapesTexture = webGlContext.createAndSetTexture(data, 6, 1)
+
+shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 })
+shapeController.addBox({ x: 0, y: 1, z: 0 }, { x: 0.75, y: 0.5, z: 2 }, { x: 1, y: 0, z: 0 })
+
+const data2 = generateShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+console.log(data2)
+webGlContext.createAndSetTexture(data2, 9, 1)
+
 
 const animate = () => {
   webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
@@ -134,5 +143,5 @@ animate()
 const reactRoot = createRoot(document.getElementById('reactRoot')!)
 
 reactRoot.render(
-    <Ui />
+  <Ui />
 )

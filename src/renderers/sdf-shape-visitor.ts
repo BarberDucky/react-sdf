@@ -43,7 +43,7 @@ export class SdfShapeVisitor extends Visitor<string, { root: string }> {
         1000.
       );` +
       u.nodes
-        .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opUnion(${u.id}.dist, ${curr.id}.dist);`))
+        .map(curr => curr.accept(this, { root: u.id }).concat(`${u.id}.dist = opUnion(${u.id}.dist, ${curr.id}.dist);`))
         .join('') +
       dedent`
       ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;
@@ -60,7 +60,7 @@ export class SdfShapeVisitor extends Visitor<string, { root: string }> {
         1000.
       );` +
       u.nodes
-        .map(curr => curr.accept(this, u.id).concat(`${u.id}.dist = opSmoothUnion(${u.id}.dist, ${curr.id}.dist, ${u.smoothness});`))
+        .map(curr => curr.accept(this, { root: u.id }).concat(`${u.id}.dist = opSmoothUnion(${u.id}.dist, ${curr.id}.dist, ${u.smoothness});`))
         .join('') +
       dedent`
       ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;

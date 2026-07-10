@@ -18,7 +18,7 @@ op1.addNodes(
   ),
 )
 
-const op2 = new SmoothUnionOperation('op2')
+const op2 = new SmoothUnionOperation('op2', 1.1)
 op2.addNodes(
   op1,
   new Sphere(

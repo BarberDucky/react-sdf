@@ -169,6 +169,12 @@ export class WebGlContext {
 
   public createAndSetTexture(data: Float32Array) {
     const newTexture = this._gl.createTexture()
+
+    if (newTexture == null) {
+      this._gl.deleteTexture(newTexture)
+      throw new Error(`Error while creating texture. Likely, the WebGL context is lost.`)
+    }
+
     this._textures.push(newTexture)
     this.setTexture(newTexture!, data)
     return newTexture
@@ -258,6 +264,12 @@ export class WebGlContext {
 
   private createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
     const program = this._gl.createProgram()
+
+    if (program == null) {
+      this._gl.deleteProgram(program)
+      throw new Error(`Error while creating program. Likely, the WebGL context is lost.`)
+    }
+
     this._gl.attachShader(program, vertexShader)
     this._gl.attachShader(program, fragmentShader)
     this._gl.linkProgram(program)

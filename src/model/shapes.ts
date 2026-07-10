@@ -3,9 +3,9 @@ import { Shape } from "./shape-tree";
 import { Visitor } from "./visitor";
 
 export class Sphere extends Shape {
-  
+
   type = 'Sphere'
-  
+
   constructor(
     public id: string,
     public position: Point3,
@@ -15,16 +15,16 @@ export class Sphere extends Shape {
     super(id, position, color)
   }
 
-  accept(v: Visitor, root: string): string {
-    return v.visitSphere(this, root)
+  accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {
+    return v.visitSphere(this, extra)
   }
 
 }
 
 export class Box extends Shape {
-  
+
   type = 'Box'
-  
+
   constructor(
     public id: string,
     public position: Point3,
@@ -34,8 +34,8 @@ export class Box extends Shape {
     super(id, position, color)
   }
 
-  accept(v: Visitor, root: string): string {
-    return v.visitBox(this, root)
+  accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {
+    return v.visitBox(this, extra)
   }
 
 }

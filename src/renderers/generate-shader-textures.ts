@@ -31,6 +31,6 @@ export function generateShaderTextures(root: Operation, shapeCount: number) {
     }
   }
 
-  console.log(debugRes)
+  // console.log(debugRes)
   return res
 }

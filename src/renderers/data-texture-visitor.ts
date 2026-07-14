@@ -24,7 +24,7 @@ export class DataTextureVisitor extends Visitor<Float32Array, undefined> {
   visitBox(b: Box): Float32Array {
     const data = new Float32Array(12)
 
-    data.set([TextureShapeType.Sphere, b.dimensions.x, b.dimensions.y, b.dimensions.z])
+    data.set([TextureShapeType.Box, b.dimensions.x, b.dimensions.y, b.dimensions.z])
     data.set([b.position.x, b.position.y, b.position.z], 4)
     data.set([b.color.x, b.color.y, b.color.z], 8)
 
@@ -34,7 +34,7 @@ export class DataTextureVisitor extends Visitor<Float32Array, undefined> {
   visitUnion(u: UnionOperation): Float32Array {
     const data = new Float32Array(12)
 
-    data.set([TextureShapeType.Sphere])
+    data.set([TextureShapeType.Union])
 
     return data
   }
@@ -42,7 +42,7 @@ export class DataTextureVisitor extends Visitor<Float32Array, undefined> {
   visitSmoothUnion(u: SmoothUnionOperation): Float32Array {
     const data = new Float32Array(12)
 
-    data.set([TextureShapeType.Sphere, u.smoothness])
+    data.set([TextureShapeType.SmoothUnion, u.smoothness])
 
     return data
   }

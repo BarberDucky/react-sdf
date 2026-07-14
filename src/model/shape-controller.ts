@@ -1,7 +1,7 @@
 import { Box, Sphere } from "../model/shapes";
 import { Point3 } from "../utils";
 import { SmoothUnionOperation, UnionOperation } from "./operations";
-import { Operation, Shape, ShapeTreeNode } from "./shape-tree";
+import { Operation, ShapeTreeNode } from "./shape-tree";
 
 export interface FlatShapeListEntry {
   id: string,
@@ -15,7 +15,7 @@ export class ShapeController {
   private lastId = 0
 
   constructor(
-    private root: Operation = new SmoothUnionOperation('root', 1.1)
+    private root: Operation = new UnionOperation('root')
   ) { }
 
   get rootOperation(): Operation {

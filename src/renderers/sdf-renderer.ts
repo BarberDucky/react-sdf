@@ -16,8 +16,6 @@ export class SdfRenderer {
   }
 
   generateFragmentShaderString(root: Operation) {
-    const objectsString = root.accept(this.visitor, { root: 'res'})
-
     return dedent`#version 300 es
       precision highp float;
 
@@ -27,6 +25,8 @@ export class SdfRenderer {
       uniform vec3 iCameraOrigin;
       uniform vec3 iLookAt;
       uniform bool iIsGizmoEnabled;
+
+      uniform int iShapeCount;
 
       uniform sampler2D iSampler1;
       uniform sampler2D iSampler2;
@@ -82,7 +82,82 @@ export class SdfRenderer {
         return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
       }
 
-      MaterialDist map(vec3 p) {
+      float intersect(vec3 p) {
+
+        float mainAxisWidth = .005;
+        float gridAxisWidth = .001;
+
+        vec3 xPos = p;
+        vec3 yPos = p;
+        vec3 zPos = p;
+        
+        xPos.yz *= rot2D(3.14 / 2.);
+        zPos.xy *= rot2D(3.14 / 2.);
+
+        float xAxis = sdCylinder(xPos + mainAxisWidth, vec3(mainAxisWidth));
+        float yAxis = sdCylinder(yPos + mainAxisWidth, vec3(mainAxisWidth));
+        float zAxis = sdCylinder(zPos + mainAxisWidth, vec3(mainAxisWidth));
+
+        float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(gridAxisWidth));
+        float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(gridAxisWidth));
+
+        float res = xAxisRepeat;
+
+        res = opUnion(res, zAxisRepeat);
+
+        // AXES
+
+        if (iIsGizmoEnabled) {
+          res = opUnion(res, xAxis);
+          res = opUnion(res, yAxis);
+          res = opUnion(res, zAxis);
+        }
+
+        // SHAPES
+
+        int sp = 0;
+        float stack[12];
+
+        int texelWidth = 3;
+
+        for (int i = 0; i < iShapeCount; i++) {
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
+
+          if (typeExtra.x < 0.5) {
+
+            float m = sdSphere(p - position, typeExtra.y);
+            stack[sp++] = m;
+
+          } else if (typeExtra.x < 1.5) {
+            
+            float m = sdBox(p - position, typeExtra.yzw);
+            stack[sp++] = m;
+
+          } else if (typeExtra.x < 2.5) {
+
+            float m1 = stack[--sp]; 
+            float m2 = stack[--sp];
+
+            float g = 1000.;
+
+            g = opUnion(g, m1);
+            g = opUnion(g, m2); 
+            stack[sp++] = g;
+
+          } else if (typeExtra.x < 3.5) {
+            // draw smooth union
+          }
+        
+        }
+
+        float f = stack[0];
+        res = opUnion(res, f);
+
+        return res;
+      }
+
+      MaterialDist shade(vec3 p) {
 
         float mainAxisWidth = .005;
         float gridAxisWidth = .001;
@@ -125,37 +200,69 @@ export class SdfRenderer {
 
         // SHAPES
 
+        int sp = 0;
+        MaterialDist stack[12];
 
-        vec4 t0 = texelFetch(iSampler1, ivec2(0, 0), 0);
-        vec4 t1 = texelFetch(iSampler1, ivec2(1, 0), 0);
-        vec4 t2 = texelFetch(iSampler1, ivec2(2, 0), 0);
+        int texelWidth = 3;
 
-        MaterialDist box123 = MaterialDist(
-          t2.rgb,
-          true,
-          sdBox(p - t1.xyz, t0.yzw)
-        );
+        for (int i = 0; i < iShapeCount; i++) {
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
+          vec3 color = texelFetch(iSampler1, ivec2(2 + i * texelWidth, 0), 0).rgb;
 
-        res.color = box123.dist < res.dist ? box123.color : res.color;
-        res.isLit = box123.dist < res.dist ? box123.isLit : res.isLit;
+          if (typeExtra.x < 0.5) {
 
-        res.dist = opUnion(res.dist, box123.dist);
+            MaterialDist m = MaterialDist(
+              color,
+              true,
+              sdSphere(p - position, typeExtra.y)
+            );
 
-        vec4 t3 = texelFetch(iSampler1, ivec2(3, 0), 0);
-        vec4 t4 = texelFetch(iSampler1, ivec2(4, 0), 0);
-        vec4 t5 = texelFetch(iSampler1, ivec2(5, 0), 0);
+            stack[sp++] = m;
 
-        MaterialDist shp123 = MaterialDist(
-          t5.rgb,
-          true,
-          sdSphere(p - t4.xyz, t3.y)
-        );
+          } else if (typeExtra.x < 1.5) {
+            
+            MaterialDist m = MaterialDist(
+              color,
+              true,
+              sdBox(p - position, typeExtra.yzw)
+            );
 
-        res.color = shp123.dist < res.dist ? shp123.color : res.color;
-        res.isLit = shp123.dist < res.dist ? shp123.isLit : res.isLit;
+            stack[sp++] = m;
 
-        res.dist = opUnion(res.dist, shp123.dist);
+          } else if (typeExtra.x < 2.5) {
+            
+            // if (sp < 2) { break; }
 
+
+            MaterialDist m1 = stack[--sp]; 
+            MaterialDist m2 = stack[--sp];
+
+            MaterialDist g = MaterialDist(
+              vec3(1.),
+              true,
+              1000.
+            ); 
+
+            g.color = m1.dist < g.dist ? m1.color : g.color;
+            g.isLit = m1.dist < g.dist ? m1.isLit : g.isLit;
+            g.dist = opUnion(g.dist, m1.dist);
+
+            g.color = m2.dist < g.dist ? m2.color : g.color;
+            g.isLit = m2.dist < g.dist ? m2.isLit : g.isLit;
+            g.dist = opUnion(g.dist, m2.dist); 
+
+            stack[sp++] = g;
+          } else if (typeExtra.x < 3.5) {
+            // draw smooth union
+          }
+        
+        }
+
+        MaterialDist f = stack[0];
+        res.color = f.dist < res.dist ? f.color : res.color;
+        res.isLit = f.dist < res.dist ? f.isLit : res.isLit;
+        res.dist = opUnion(res.dist, f.dist);
 
         return res;
       }
@@ -163,9 +270,9 @@ export class SdfRenderer {
       vec3 GetNormal(vec3 p) {
         float EPS = 0.0001;
         vec3 n = vec3(
-          map(p + vec3(EPS, 0., 0.)).dist - map(p - vec3(EPS, 0., 0.)).dist,
-          map(p + vec3(0., EPS, 0.)).dist - map(p - vec3(0., EPS, 0.)).dist,
-          map(p + vec3(0., 0., EPS)).dist - map(p - vec3(0., 0., EPS)).dist
+          intersect(p + vec3(EPS, 0., 0.)) - intersect(p - vec3(EPS, 0., 0.)),
+          intersect(p + vec3(0., EPS, 0.)) - intersect(p - vec3(0., EPS, 0.)),
+          intersect(p + vec3(0., 0., EPS)) - intersect(p - vec3(0., 0., EPS))
         );
 
         return normalize(n);
@@ -200,26 +307,28 @@ export class SdfRenderer {
 
         float t = 0.;
         MaterialDist m = MaterialDist(vec3(0.), false, 0.);
+        float inter = 0.;
         vec3 p;
+        int isWhite = 0;
 
         for (int i = 0; i < 256; i++) {
           p = ro + rd * t;
 
-          m = map(p);
-
-          float d = m.dist;
+          float d = intersect(p);
 
           t += d;
 
           if (d < .001) break;
 
           if (t > 1000.) {
-            m.color = vec3(1.);
+            isWhite = 1;
             break;
           }
 
         }
         
+        m = shade(p);
+
         vec3 lightDir = normalize(vec3(1., 2., -1.));
         vec3 lightColor = vec3(1.);
         vec3 normal = GetNormal(p);
@@ -228,7 +337,7 @@ export class SdfRenderer {
 
         vec3 light = m.isLit ? lambertian + spec * .0 : vec3(1.);
 
-        col = m.color * light;
+        col = (isWhite == 0 ? m.color : vec3(1.)) * light;
         col = pow(col, vec3(1. / 2.2));
         col = mix(col, vec3(1.), t * 0.02);
 

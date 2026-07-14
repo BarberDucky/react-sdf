@@ -6,7 +6,7 @@ import MouseMovementManager from "./mouse-movement-manager"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import Ui from "./ui/ui"
-import { Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
+import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
 
 import { createRoot } from "react-dom/client"
 import { Store } from "./store"
@@ -88,43 +88,17 @@ const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', va
 const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
-
-const dataTextureVisitor = new DataTextureVisitor()
-
-const sphere = new Sphere(
-  'sph123',
-  { x: 0, y: 1, z: 0 },
-  { x: 1, y: 0, z: 0 },
-  1
-)
-
-const box = new Box(
-  'box123',
-  { x: 0, y: 1, z: 0 },
-  { x: 1, y: 0, z: 0 },
-  { x: 0.75, y: 0.5, z: 2 },
-)
-
-const sphereData = dataTextureVisitor.visitSphere(sphere)
-
-const boxData = dataTextureVisitor.visitBox(box)
-
-const data = new Float32Array(24)
-data.set([...sphereData])
-data.set([...boxData], boxData.length)
-
-// const shapesTexture = webGlContext.createAndSetTexture(data, 6, 1)
+const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }) as Uniform1i
 
 shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 })
 shapeController.addBox({ x: 0, y: 1, z: 0 }, { x: 0.75, y: 0.5, z: 2 }, { x: 1, y: 0, z: 0 })
 
 const data2 = generateShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
-console.log(data2)
-webGlContext.createAndSetTexture(data2, 9, 1)
+const tex = webGlContext.createAndSetTexture(data2, 9, 1)
 
 
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
+  // webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -133,6 +107,10 @@ const animate = () => {
   uCameraOrigin.updateValue({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
   uLookAt.updateValue({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
   uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
+  uShapeCount.updateValue(shapeController.flatShapeList.length)
+
+  const data3 = generateShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+  webGlContext.setTexture(tex, data3, 9, 1)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)

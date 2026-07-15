@@ -57,6 +57,16 @@ export class SdfRenderer {
           return mix( d2, d1, h ) - k*h*(1.0-h);
       }
 
+      float opSmoothSubtraction( float a, float b, float k )
+      {
+          return -opSmoothUnion(a,-b,k);
+      }
+
+      float opSmoothIntersection( float a, float b, float k )
+      {
+          return -opSmoothUnion(-a,-b,k);
+      }
+
       float sdCylinder( vec3 p, vec3 c )
       {
         return length(p.xz-c.xy)-c.z;
@@ -81,9 +91,11 @@ export class SdfRenderer {
 
       float doOperation(vec2 opData, float d1, float d2) {
         if (opData.x < 0.5) {
-          return opUnion(d1, d2);
-        } else if (opData.x < 1.5) {
           return opSmoothUnion(d1, d2, opData.y);
+        } else if (opData.x < 1.5) {
+          return opSmoothSubtraction(d1, d2, opData.y);
+        } else if (opData.x < 2.5) {
+          return opSmoothIntersection(d1, d2, opData.y); 
         }
       }
 
@@ -122,6 +134,8 @@ export class SdfRenderer {
 
         int texelWidth = 4;
 
+        float shapeDist = 1000.;
+
         for (int i = 0; i < iShapeCount; i++) {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
           vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
@@ -130,20 +144,20 @@ export class SdfRenderer {
           if (typeExtra.x < 0.5) {
 
             float m = sdSphere(p - position, typeExtra.y);
-            res = doOperation(operation, res, m);
+            shapeDist = doOperation(operation, shapeDist, m); 
 
           } else if (typeExtra.x < 1.5) {
             
             float m = sdBox(p - position, typeExtra.yzw);
-            res = doOperation(operation, res, m);
+            shapeDist = doOperation(operation, shapeDist, m);
 
           } else if (typeExtra.x < 2.5) {
             // skip group
           }
-        
+          
         }
 
-        return res;
+        return opUnion(res, shapeDist);
       }
 
       float intersectTree(vec3 p) {
@@ -264,6 +278,12 @@ export class SdfRenderer {
 
         int texelWidth = 4;
 
+        MaterialDist shapesMat = MaterialDist(
+          vec3(1.),
+          true,
+          1000.
+        ); 
+
         MaterialDist m;
 
         for (int i = 0; i < iShapeCount; i++) {
@@ -280,9 +300,9 @@ export class SdfRenderer {
               sdSphere(p - position, typeExtra.y)
             );
             
-            res.color = m.dist < res.dist ? m.color : res.color;
-            res.isLit = m.dist < res.dist ? m.isLit : res.isLit;
-            res.dist = doOperation(operation, res.dist, m.dist);
+            shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
+            shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
+            shapesMat.dist = doOperation(operation, shapesMat.dist, m.dist);
 
           } else if (typeExtra.x < 1.5) {
             
@@ -292,15 +312,19 @@ export class SdfRenderer {
               sdBox(p - position, typeExtra.yzw)
             );
 
-            res.color = m.dist < res.dist ? m.color : res.color;
-            res.isLit = m.dist < res.dist ? m.isLit : res.isLit;
-            res.dist = doOperation(operation, res.dist, m.dist);
+            shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
+            shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
+            shapesMat.dist = doOperation(operation, shapesMat.dist, m.dist);
 
           } else if (typeExtra.x < 2.5) {
             // skip group
           }
         }
 
+        res.color = shapesMat.dist < res.dist ? shapesMat.color : res.color;
+        res.isLit = shapesMat.dist < res.dist ? shapesMat.isLit : res.isLit;
+        res.dist = opUnion(res.dist, shapesMat.dist);
+        
         return res;
       }
 

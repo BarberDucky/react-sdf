@@ -92,7 +92,7 @@ const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
 const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }) as Uniform1i
 
-shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 }, { type: 'union' })
+shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 }, { type: 'intersection', smoothness: 0.1 })
 shapeController.addBox({ x: 0, y: 1, z: 0 }, { x: 0.75, y: 0.5, z: 2 }, { x: 1, y: 0, z: 0 }, { type: 'union' })
 
 let treeData = generateTreeShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)

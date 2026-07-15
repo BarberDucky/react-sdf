@@ -3,6 +3,8 @@ import { Visitor } from "./visitor";
 
 export type Operation =
   | { type: 'union', smoothness?: number }
+  | { type: 'difference', smoothness?: number }
+  | { type: 'intersection', smoothness?: number }
 
 export abstract class ShapeTreeNode {
 

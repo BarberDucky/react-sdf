@@ -1,7 +1,7 @@
 import { Group, ShapeTreeNode } from "../model/shape-tree";
 import { DataTextureVisitor } from "./data-texture-visitor";
 
-export function generateShaderTextures(root: Group, shapeCount: number) {
+export function generateTreeShaderTextures(root: Group, shapeCount: number) {
 
   const dataTextureVisitor = new DataTextureVisitor()
 
@@ -32,5 +32,31 @@ export function generateShaderTextures(root: Group, shapeCount: number) {
   }
 
   // console.log(debugRes)
+  return res
+}
+
+export function generateListShaderTextures(root: Group, shapeCount: number) {
+
+  const dataTextureVisitor = new DataTextureVisitor()
+
+  const queue: Array<{ depth: number, node: ShapeTreeNode }> = [{ depth: 0, node: root }]
+  const res = new Float32Array(4 * 4 * shapeCount)
+  let resPosition = 0
+
+  while (queue.length > 0) {
+    const curr = queue.pop()!
+    res.set(curr.node.accept(dataTextureVisitor), 16 * resPosition)
+    resPosition++
+
+    if (curr.node instanceof Group) {
+      for (let i = curr.node.nodes.length - 1; i >= 0; i--) {
+        queue.push({
+          node: curr.node.nodes[i],
+          depth: curr.depth + 1
+        })
+      }
+    }
+  }
+
   return res
 }

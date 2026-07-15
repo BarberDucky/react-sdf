@@ -12,7 +12,7 @@ import { createRoot } from "react-dom/client"
 import { Store } from "./store"
 import { Box, Sphere } from "./model/shapes"
 import { DataTextureVisitor } from "./renderers/data-texture-visitor"
-import { generateShaderTextures } from "./renderers/generate-shader-textures"
+import { generateListShaderTextures, generateTreeShaderTextures } from "./renderers/generate-shader-textures"
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -95,8 +95,11 @@ const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', va
 shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 }, { type: 'union' })
 shapeController.addBox({ x: 0, y: 1, z: 0 }, { x: 0.75, y: 0.5, z: 2 }, { x: 1, y: 0, z: 0 }, { type: 'union' })
 
-const data2 = generateShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
-const tex = webGlContext.createAndSetTexture(data2, 12, 1)
+let treeData = generateTreeShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+const treeTex = webGlContext.createAndSetTexture(treeData, 12, 1)
+
+let listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+const listTex = webGlContext.createAndSetTexture(listData, 12, 1)
 
 
 const animate = () => {
@@ -111,8 +114,11 @@ const animate = () => {
   uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
   uShapeCount.updateValue(shapeController.flatShapeList.length)
 
-  const data3 = generateShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
-  webGlContext.setTexture(tex, data3, 9, 1)
+  treeData = generateTreeShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+  webGlContext.setTexture(treeTex, treeData, 12, 1)
+
+  listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+  webGlContext.setTexture(listTex, listData, 12, 1)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)

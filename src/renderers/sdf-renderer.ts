@@ -79,7 +79,74 @@ export class SdfRenderer {
         return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
       }
 
-      float intersect(vec3 p) {
+      float doOperation(vec2 opData, float d1, float d2) {
+        if (opData.x < 0.5) {
+          return opUnion(d1, d2);
+        } else if (opData.x < 1.5) {
+          return opSmoothUnion(d1, d2, opData.y);
+        }
+      }
+
+      float intersectList(vec3 p) {
+
+        float mainAxisWidth = .005;
+        float gridAxisWidth = .001;
+
+        vec3 xPos = p;
+        vec3 yPos = p;
+        vec3 zPos = p;
+        
+        xPos.yz *= rot2D(3.14 / 2.);
+        zPos.xy *= rot2D(3.14 / 2.);
+
+        float xAxis = sdCylinder(xPos + mainAxisWidth, vec3(mainAxisWidth));
+        float yAxis = sdCylinder(yPos + mainAxisWidth, vec3(mainAxisWidth));
+        float zAxis = sdCylinder(zPos + mainAxisWidth, vec3(mainAxisWidth));
+
+        float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(gridAxisWidth));
+        float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(gridAxisWidth));
+
+        float res = xAxisRepeat;
+
+        res = opUnion(res, zAxisRepeat);
+
+        // AXES
+
+        if (iIsGizmoEnabled) {
+          res = opUnion(res, xAxis);
+          res = opUnion(res, yAxis);
+          res = opUnion(res, zAxis);
+        }
+
+        // SHAPES
+
+        int texelWidth = 4;
+
+        for (int i = 0; i < iShapeCount; i++) {
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
+          vec2 operation = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xy;
+
+          if (typeExtra.x < 0.5) {
+
+            float m = sdSphere(p - position, typeExtra.y);
+            res = doOperation(operation, res, m);
+
+          } else if (typeExtra.x < 1.5) {
+            
+            float m = sdBox(p - position, typeExtra.yzw);
+            res = doOperation(operation, res, m);
+
+          } else if (typeExtra.x < 2.5) {
+            // skip group
+          }
+        
+        }
+
+        return res;
+      }
+
+      float intersectTree(vec3 p) {
 
         float mainAxisWidth = .005;
         float gridAxisWidth = .001;
@@ -152,7 +219,92 @@ export class SdfRenderer {
         return res;
       }
 
-      MaterialDist shade(vec3 p) {
+      MaterialDist shadeList(vec3 p) {
+
+        float mainAxisWidth = .005;
+        float gridAxisWidth = .001;
+
+        vec3 xPos = p;
+        vec3 yPos = p;
+        vec3 zPos = p;
+        
+        xPos.yz *= rot2D(3.14 / 2.);
+        zPos.xy *= rot2D(3.14 / 2.);
+
+        float xAxis = sdCylinder(xPos + mainAxisWidth, vec3(mainAxisWidth));
+        float yAxis = sdCylinder(yPos + mainAxisWidth, vec3(mainAxisWidth));
+        float zAxis = sdCylinder(zPos + mainAxisWidth, vec3(mainAxisWidth));
+
+        float xAxisRepeat = opLineRepetition(xPos, vec3(.25, 0., 0.), vec3(gridAxisWidth));
+        float zAxisRepeat = opLineRepetition(zPos, vec3(0., 0., .25), vec3(gridAxisWidth));
+
+        MaterialDist res = MaterialDist(
+          vec3(0.8),
+          false,
+          xAxisRepeat
+        );  
+
+        res.color = zAxisRepeat < res.dist ? vec3(0.8) : res.color;
+        res.dist = opUnion(res.dist, zAxisRepeat);
+
+        // AXES
+
+        if (iIsGizmoEnabled) {
+          res.color = xAxis < res.dist ? vec3(1., 0., 0.) : res.color;
+          res.dist = opUnion(res.dist, xAxis);
+
+          res.color = yAxis < res.dist ? vec3(0., 1., 0.) : res.color;
+          res.dist = opUnion(res.dist, yAxis);
+
+          res.color = zAxis < res.dist ? vec3(0., 0., 1.) : res.color;
+          res.dist = opUnion(res.dist, zAxis);
+        }
+
+        // SHAPES
+
+        int texelWidth = 4;
+
+        MaterialDist m;
+
+        for (int i = 0; i < iShapeCount; i++) {
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
+          vec3 color = texelFetch(iSampler1, ivec2(2 + i * texelWidth, 0), 0).rgb;
+          vec2 operation = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xy;
+
+          if (typeExtra.x < 0.5) {
+
+            m = MaterialDist(
+              color,
+              true,
+              sdSphere(p - position, typeExtra.y)
+            );
+            
+            res.color = m.dist < res.dist ? m.color : res.color;
+            res.isLit = m.dist < res.dist ? m.isLit : res.isLit;
+            res.dist = doOperation(operation, res.dist, m.dist);
+
+          } else if (typeExtra.x < 1.5) {
+            
+            MaterialDist m = MaterialDist(
+              color,
+              true,
+              sdBox(p - position, typeExtra.yzw)
+            );
+
+            res.color = m.dist < res.dist ? m.color : res.color;
+            res.isLit = m.dist < res.dist ? m.isLit : res.isLit;
+            res.dist = doOperation(operation, res.dist, m.dist);
+
+          } else if (typeExtra.x < 2.5) {
+            // skip group
+          }
+        }
+
+        return res;
+      }
+
+      MaterialDist shadeTree(vec3 p) {
 
         float mainAxisWidth = .005;
         float gridAxisWidth = .001;
@@ -265,9 +417,9 @@ export class SdfRenderer {
       vec3 GetNormal(vec3 p) {
         float EPS = 0.0001;
         vec3 n = vec3(
-          intersect(p + vec3(EPS, 0., 0.)) - intersect(p - vec3(EPS, 0., 0.)),
-          intersect(p + vec3(0., EPS, 0.)) - intersect(p - vec3(0., EPS, 0.)),
-          intersect(p + vec3(0., 0., EPS)) - intersect(p - vec3(0., 0., EPS))
+          intersectList(p + vec3(EPS, 0., 0.)) - intersectList(p - vec3(EPS, 0., 0.)),
+          intersectList(p + vec3(0., EPS, 0.)) - intersectList(p - vec3(0., EPS, 0.)),
+          intersectList(p + vec3(0., 0., EPS)) - intersectList(p - vec3(0., 0., EPS))
         );
 
         return normalize(n);
@@ -309,7 +461,7 @@ export class SdfRenderer {
         for (int i = 0; i < 256; i++) {
           p = ro + rd * t;
 
-          float d = intersect(p);
+          float d = intersectList(p);
 
           t += d;
 
@@ -322,7 +474,7 @@ export class SdfRenderer {
 
         }
         
-        m = shade(p);
+        m = shadeList(p);
 
         vec3 lightDir = normalize(vec3(1., 2., -1.));
         vec3 lightColor = vec3(1.);

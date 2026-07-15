@@ -1,7 +1,6 @@
 import { Box, Sphere } from "../model/shapes";
 import { Point3 } from "../utils";
-import { SmoothUnionOperation, UnionOperation } from "./operations";
-import { Operation, ShapeTreeNode } from "./shape-tree";
+import { Group, Operation, ShapeTreeNode } from "./shape-tree";
 
 export interface FlatShapeListEntry {
   id: string,
@@ -15,10 +14,10 @@ export class ShapeController {
   private lastId = 0
 
   constructor(
-    private root: Operation = new UnionOperation('root')
+    private root = new Group('root', { type: 'union' })
   ) { }
 
-  get rootOperation(): Operation {
+  get rootOperation(): Group {
     return this.root
   }
 
@@ -36,7 +35,7 @@ export class ShapeController {
         node: curr.node,
       })
 
-      if (curr.node instanceof Operation) {
+      if (curr.node instanceof Group) {
         for (let i = curr.node.nodes.length - 1; i >= 0; i--) {
           queue.push({
             node: curr.node.nodes[i],
@@ -53,43 +52,34 @@ export class ShapeController {
     return this.flatShapeList.find(element => element.id == id)?.node
   }
 
-  addSphere(position: Point3, radius: number, color: Point3) {
+  addSphere(position: Point3, radius: number, color: Point3, operation: Operation) {
     const sphere = new Sphere(
       'shp' + this.newId,
       position,
       color,
       radius,
+      operation,
     )
     this.root.addNodes(sphere)
     return sphere
   }
 
-  addBox(position: Point3, dimensions: Point3, color: Point3) {
+  addBox(position: Point3, dimensions: Point3, color: Point3, operation: Operation) {
     const box = new Box(
       'shp' + this.newId,
       position,
       color,
       dimensions,
+      operation
     )
     this.root.addNodes(box)
     return box
   }
 
-  addUnion() {
-    const union = new UnionOperation(
-      'op' + this.newId
-    )
-    this.root.addNodes(union)
-    return union
-  }
-
-  addSmoothUnion(smoothness: number) {
-    const smoothUnion = new SmoothUnionOperation(
-      'op' + this.newId,
-      smoothness,
-    )
-    this.root.addNodes(smoothUnion)
-    return smoothUnion
+  addGroup(operation: Operation) {
+    const group = new Group('op' + this.newId, operation)
+    this.root.addNodes(group)
+    return group
   }
 
   private get newId() {

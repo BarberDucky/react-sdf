@@ -1,24 +1,25 @@
-import { SmoothUnionOperation, UnionOperation } from "./operations";
-import { ShapeTreeNode } from "./shape-tree";
+import { Group, ShapeTreeNode } from "./shape-tree";
 import { Sphere } from "./shapes";
 
-const op1 = new UnionOperation('op1')
+const op1 = new Group('op1', { type: 'union' })
 op1.addNodes(
   new Sphere(
     'shp0',
     { x: 0, y: 0, z: 0 },
     { x: 0., y: 0., z: 1. },
     1,
+    { type: 'union' },
   ),
   new Sphere(
     'shp1',
     { x: 0., y: 1.2, z: 0 },
     { x: 1, y: 0, z: 0 },
     1,
+    { type: 'union' },
   ),
 )
 
-const op2 = new SmoothUnionOperation('op2', 1.1)
+const op2 = new Group('op2', { type: 'union', smoothness: 1.1 })
 op2.addNodes(
   op1,
   new Sphere(
@@ -26,6 +27,7 @@ op2.addNodes(
     { x: 1.2, y: 0, z: 0 },
     { x: 0, y: 1, z: 0 },
     1,
+    { type: 'union' },
   ),
 )
 

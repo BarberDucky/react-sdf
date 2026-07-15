@@ -1,5 +1,5 @@
 import { Point3 } from "../utils";
-import { Shape } from "./shape-tree";
+import { Operation, Shape } from "./shape-tree";
 import { Visitor } from "./visitor";
 
 export class Sphere extends Shape {
@@ -10,9 +10,10 @@ export class Sphere extends Shape {
     public id: string,
     public position: Point3,
     public color: Point3,
-    public radius: number
+    public radius: number,
+    public operation: Operation,
   ) {
-    super(id, position, color)
+    super(id, position, color, operation)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {
@@ -30,8 +31,9 @@ export class Box extends Shape {
     public position: Point3,
     public color: Point3,
     public dimensions: Point3,
+    public operation: Operation,
   ) {
-    super(id, position, color)
+    super(id, position, color, operation)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {

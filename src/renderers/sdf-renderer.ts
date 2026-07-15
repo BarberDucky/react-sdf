@@ -1,10 +1,7 @@
-import { Operation } from "../model/shape-tree"
+import { Group } from "../model/shape-tree"
 import { dedent } from "../utils"
-import { SdfShapeVisitor } from "./sdf-shape-visitor"
 
 export class SdfRenderer {
-
-  private visitor = new SdfShapeVisitor()
 
   generateVertexShaderString() {
     return dedent`#version 300 es
@@ -15,7 +12,7 @@ export class SdfRenderer {
       }`
   }
 
-  generateFragmentShaderString(root: Operation) {
+  generateFragmentShaderString(root: Group) {
     return dedent`#version 300 es
       precision highp float;
 
@@ -118,7 +115,7 @@ export class SdfRenderer {
         int sp = 0;
         float stack[12];
 
-        int texelWidth = 3;
+        int texelWidth = 4;
 
         for (int i = 0; i < iShapeCount; i++) {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
@@ -145,8 +142,6 @@ export class SdfRenderer {
             g = opUnion(g, m2); 
             stack[sp++] = g;
 
-          } else if (typeExtra.x < 3.5) {
-            // draw smooth union
           }
         
         }
@@ -203,7 +198,7 @@ export class SdfRenderer {
         int sp = 0;
         MaterialDist stack[12];
 
-        int texelWidth = 3;
+        int texelWidth = 4;
 
         for (int i = 0; i < iShapeCount; i++) {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);

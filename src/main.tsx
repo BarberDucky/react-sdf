@@ -10,6 +10,7 @@ import { Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-c
 
 import { createRoot } from "react-dom/client"
 import { Store } from "./store"
+import { generateListShaderTextures } from "./renderers/generate-data-textures.ts";
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -34,7 +35,7 @@ export const store = new Store<AppStoreModel>({
 const webGlContext = new WebGlContext(
   canvas,
   sdfRenderer.generateVertexShaderString(),
-  sdfRenderer.generateFragmentShaderString(shapeController.rootOperation)
+  sdfRenderer.generateFragmentShaderString()
 )
 
 const camera = new Camera(
@@ -88,8 +89,14 @@ const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f'
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
 
+const listTex = webGlContext.createDataTexture()
+
+shapeController.addSphere({ x: 0, y: 1, z: 0 }, 1, { x: 1, y: 0, z: 0 }, { type: 'union', smoothness: 0.1 })
+shapeController.addBox({ x: 0, y: 1, z: 0 }, { x: 0.75, y: 0.5, z: 2 }, { x: 1, y: 0, z: 0 }, { type: 'union' })
+
+console.log(generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length), shapeController.flatShapeList)
+
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -98,6 +105,9 @@ const animate = () => {
   uCameraOrigin.updateValue({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
   uLookAt.updateValue({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
   uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
+
+  const listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+  webGlContext.setDataTexture(listTex, listData, 12, 1)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)

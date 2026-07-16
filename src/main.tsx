@@ -6,10 +6,12 @@ import MouseMovementManager from "./mouse-movement-manager"
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import Ui from "./ui/ui"
-import { Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
+import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
 
 import { createRoot } from "react-dom/client"
 import { Store } from "./store"
+import { generateListShaderTextures } from "./renderers/generate-data-textures.ts";
+import { TEXEL_COUNT } from "./renderers/consts.ts";
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -34,7 +36,7 @@ export const store = new Store<AppStoreModel>({
 const webGlContext = new WebGlContext(
   canvas,
   sdfRenderer.generateVertexShaderString(),
-  sdfRenderer.generateFragmentShaderString(shapeController.rootOperation)
+  sdfRenderer.generateFragmentShaderString()
 )
 
 const camera = new Camera(
@@ -87,9 +89,11 @@ const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', va
 const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
+const uShapeCount = webGlContext.registerUniform('iShapeCount', {type: '1i', value: shapeController.flatShapeList.length}) as Uniform1i
+
+const listTex = webGlContext.createDataTexture()
 
 const animate = () => {
-  webGlContext.recompileFragmentShader(sdfRenderer.generateFragmentShaderString(shapeController.rootOperation))
 
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
@@ -98,6 +102,10 @@ const animate = () => {
   uCameraOrigin.updateValue({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
   uLookAt.updateValue({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
   uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
+  uShapeCount.updateValue(shapeController.flatShapeList.length)
+
+  const listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
+  webGlContext.setDataTexture(listTex, listData, TEXEL_COUNT * shapeController.flatShapeList.length, 1)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)

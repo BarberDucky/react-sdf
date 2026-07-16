@@ -1,4 +1,4 @@
-import { Operation } from "../model/shape-tree"
+import { Group } from "../model/shape-tree"
 import { dedent } from "../utils"
 import { SdfShapeVisitor } from "./sdf-shape-visitor"
 
@@ -15,7 +15,7 @@ export class SdfRenderer {
       }`
   }
 
-  generateFragmentShaderString(root: Operation) {
+  generateFragmentShaderString(root: Group) {
     const objectsString = root.accept(this.visitor, { root: 'res' })
 
     return dedent`#version 300 es

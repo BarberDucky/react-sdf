@@ -1,7 +1,7 @@
-import { SmoothUnionOperation, UnionOperation } from "../model/operations";
 import { Box, Sphere } from "../model/shapes";
 import { Visitor } from "../model/visitor";
 import { dedent, floatToGlslFloat, point3ToVec3 } from "../utils";
+import { Group } from "../model/shape-tree.ts";
 
 export class SdfShapeVisitor extends Visitor<string, { root: string }> {
 
@@ -33,38 +33,27 @@ export class SdfShapeVisitor extends Visitor<string, { root: string }> {
       ${root}.isLit = ${b.id}.dist < ${root}.dist ? ${b.id}.isLit : ${root}.isLit;`
   }
 
-  public visitUnion(u: UnionOperation, extra: { root: string }): string {
+  public visitGroup(g: Group, extra: { root: string }): string {
     const { root } = extra
 
+    const getOpString = (shapeId: string) => {
+      return g.operation.smoothness == null
+        ? `${g.id}.dist = opUnion(${g.id}.dist, ${shapeId}.dist);`
+        : `${g.id}.dist = opSmoothUnion(${g.id}.dist, ${shapeId}.dist, ${g.operation.smoothness});`
+    }
+
     return dedent`
-      MaterialDist ${u.id} = MaterialDist(
+      MaterialDist ${g.id} = MaterialDist(
         vec3(1.),
         true,
         1000.
       );` +
-      u.nodes
-        .map(curr => curr.accept(this, { root: u.id }).concat(`${u.id}.dist = opUnion(${u.id}.dist, ${curr.id}.dist);`))
+      g.nodes
+        .map(curr => curr.accept(this, { root: g.id }).concat(getOpString(curr.id)))
         .join('') +
       dedent`
-      ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;
-      ${root}.isLit = ${u.id}.dist < ${root}.dist ? true : ${root}.isLit;`
-  }
-
-  public visitSmoothUnion(u: SmoothUnionOperation, extra: { root: string }): string {
-    const { root } = extra
-
-    return dedent`
-      MaterialDist ${u.id} = MaterialDist(
-        vec3(1.),
-        true,
-        1000.
-      );` +
-      u.nodes
-        .map(curr => curr.accept(this, { root: u.id }).concat(`${u.id}.dist = opSmoothUnion(${u.id}.dist, ${curr.id}.dist, ${u.smoothness});`))
-        .join('') +
-      dedent`
-      ${root}.color = ${u.id}.dist < ${root}.dist ? ${u.id}.color : ${root}.color;
-      ${root}.isLit = ${u.id}.dist < ${root}.dist ? true : ${root}.isLit;`
+      ${root}.color = ${g.id}.dist < ${root}.dist ? ${g.id}.color : ${root}.color;
+      ${root}.isLit = ${g.id}.dist < ${root}.dist ? true : ${root}.isLit;`
   }
 
 }

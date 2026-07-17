@@ -1,8 +1,10 @@
 import { Point3 } from "../utils";
 import { Visitor } from "./visitor";
 
-export type Operation =
-  | { type: 'union', smoothness?: number }
+export interface Operation {
+  type: 'union' | 'difference' | 'intersection'
+  smoothness?: number
+}
 
 export abstract class ShapeTreeNode {
 

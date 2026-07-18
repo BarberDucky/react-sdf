@@ -96,6 +96,11 @@ export class SdfRenderer {
         }
       }
 
+      float opRound( in float d, in float rad )
+      {
+          return d - rad;
+      }
+
       float intersectList(vec3 p) {
 
         float mainAxisWidth = .005;
@@ -136,19 +141,21 @@ export class SdfRenderer {
         for (int i = 0; i < iShapeCount; i++) {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
           vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
-          vec2 operation = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xy;
+          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
             // skip group
           } else if (typeExtra.x < 1.5) {
             
             float m = sdSphere(p - position, typeExtra.y);
-            shapeDist = doOperation(operation, shapeDist, m);
+            m = opRound(m, operationRound.z);
+            shapeDist = doOperation(operationRound.xy, shapeDist, m);
 
           } else if (typeExtra.x < 2.5) {
             
             float m = sdBox(p - position, typeExtra.yzw);
-            shapeDist = doOperation(operation, shapeDist, m);
+            m = opRound(m, operationRound.z);
+            shapeDist = doOperation(operationRound.xy, shapeDist, m);
             
           }
         
@@ -285,7 +292,7 @@ export class SdfRenderer {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
           vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
           vec3 color = texelFetch(iSampler1, ivec2(2 + i * texelWidth, 0), 0).rgb;
-          vec2 operation = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xy;
+          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
 
@@ -298,10 +305,11 @@ export class SdfRenderer {
               true,
               sdSphere(p - position, typeExtra.y)
             );
+            m.dist = opRound(m.dist, operationRound.z);
             
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
-            shapesMat.dist = doOperation(operation, shapesMat.dist, m.dist);
+            shapesMat.dist = doOperation(operationRound.xy, shapesMat.dist, m.dist);
 
           } else if (typeExtra.x < 2.5) {
             
@@ -310,10 +318,11 @@ export class SdfRenderer {
               true,
               sdBox(p - position, typeExtra.yzw)
             );
+            m.dist = opRound(m.dist, operationRound.z);
 
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
-            shapesMat.dist = doOperation(operation, shapesMat.dist, m.dist);
+            shapesMat.dist = doOperation(operationRound.xy, shapesMat.dist, m.dist);
             
           }
         }

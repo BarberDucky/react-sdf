@@ -53,6 +53,7 @@ mouseMovementManager.addClickCallback(() => {
       0.5,
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },
+      0,
     )
   }
   if (activeShape === 'box') {
@@ -61,6 +62,7 @@ mouseMovementManager.addClickCallback(() => {
       { x: 1, y: 1, z: 1 },
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },
+      0,
     )
   }
 

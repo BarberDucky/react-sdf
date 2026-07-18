@@ -166,9 +166,14 @@ const ShapeProperties = () => {
     <ShapeProp label='Roundness'>
       <RangeInput
         labelColor='#0060ac'
-        range={{ min: 0, max: 100 }}
-        value={50}
-        onValueChange={(value) => console.log('Roundness ', value)}
+        range={{ min: 0, max: 10 }}
+        step={0.05}
+        value={shapeData.node.roundness}
+        onValueChange={(value) => {
+          if (!(shapeData?.node instanceof Shape)) return
+          shapeData.node.roundness = value
+          store.setState({ ...uiStore })
+        }}
       />
     </ShapeProp>
   </div>

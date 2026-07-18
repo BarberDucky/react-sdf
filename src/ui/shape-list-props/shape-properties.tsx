@@ -7,7 +7,7 @@ import RangeInput from '../inputs/range-input'
 import ShapeProp from './shape-prop'
 import './shape-properties.css'
 import { store } from '../../main'
-import { Shape } from '../../model/shape-tree'
+import { Operation, Shape } from '../../model/shape-tree'
 import { hexToRgb } from '../../utils'
 
 const ShapeProperties = () => {
@@ -20,6 +20,12 @@ const ShapeProperties = () => {
     if (Number.isNaN(value)) return
     if (!(shapeData?.node instanceof Shape)) return
     shapeData.node.position[axis] = value
+    store.setState({ ...uiStore })
+  }
+
+  function handleCombineModeChange(operation: Operation['type']) {
+    if (!(shapeData?.node instanceof Shape)) return
+    shapeData.node.operation.type = operation
     store.setState({ ...uiStore })
   }
 
@@ -122,25 +128,39 @@ const ShapeProperties = () => {
         <ButtonInput
           label='Union'
           icon={UnionIcon}
-          isSelected={true}
+          isSelected={shapeData.node.operation.type == 'union'}
           type='union'
-          onClick={(type: string) => console.log('Selected ', type)}
+          onClick={() => handleCombineModeChange('union')}
         />
         <ButtonInput
           label='Intersect'
           icon={IntersectionIcon}
-          isSelected={false}
+          isSelected={shapeData.node.operation.type == 'intersection'}
           type='intersect'
-          onClick={(type: string) => console.log('Selected ', type)}
+          onClick={() => handleCombineModeChange('intersection')}
         />
         <ButtonInput
           label='Difference'
           icon={DifferenceIcon}
-          isSelected={false}
+          isSelected={shapeData.node.operation.type == 'difference'}
           type='difference'
-          onClick={(type: string) => console.log('Selected ', type)}
+          onClick={() => handleCombineModeChange('difference')}
         />
       </div>
+    </ShapeProp>
+
+    <ShapeProp label='Combine Intensity'>
+      <RangeInput
+        labelColor='#0060ac'
+        step={0.05}
+        range={{ min: 0, max: 2 }}
+        value={shapeData.node.operation.smoothness ?? 0}
+        onValueChange={(value) => {
+          if (!(shapeData?.node instanceof Shape)) return
+          shapeData.node.operation.smoothness = value
+          store.setState({ ...uiStore })
+        }}
+      />
     </ShapeProp>
 
     <ShapeProp label='Roundness'>

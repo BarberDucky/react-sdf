@@ -4,6 +4,7 @@ function RangeInput(props: {
   labelColor: string;
   value: number;
   range: { min: number; max: number };
+  step?: number;
   onValueChange: (value: number) => void;
 }) {
   return (
@@ -11,6 +12,7 @@ function RangeInput(props: {
       <input
         style={{ accentColor: props.labelColor }}
         type="range"
+        step={props.step}
         min={props.range.min}
         max={props.range.max}
         value={props.value}

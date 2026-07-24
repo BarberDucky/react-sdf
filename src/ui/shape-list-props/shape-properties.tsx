@@ -23,6 +23,13 @@ const ShapeProperties = () => {
     store.setState({ ...uiStore })
   }
 
+  function handleRotationChange(axis: 'x' | 'y' | 'z', value: number) {
+    if (Number.isNaN(value)) return
+    if (!(shapeData?.node instanceof Shape)) return
+    shapeData.node.rotation[axis] = value
+    store.setState({ ...uiStore })
+  }
+
   function handleCombineModeChange(operation: Operation['type']) {
     if (!(shapeData?.node instanceof Shape)) return
     shapeData.node.operation.type = operation
@@ -68,45 +75,42 @@ const ShapeProperties = () => {
         <NumberInput
           label='X'
           labelColor='#6d5e00'
-          value={0}
-          onValueChange={(value) => console.log('Rotation', value)}
+          value={shapeData.node.rotation.x}
+          onValueChange={(value) => {
+            handleRotationChange('x', value)
+          }}
         />
         <NumberInput
           label='Y'
           labelColor='#a43073'
-          value={0}
-          onValueChange={(value) => console.log('Rotation', value)}
+          value={shapeData.node.rotation.y}
+          onValueChange={(value) => {
+            handleRotationChange('y', value)
+          }}
         />
         <NumberInput
           label='Z'
           labelColor='#0060ac'
-          value={0}
-          onValueChange={(value) => console.log('Rotation', value)}
+          value={shapeData.node.rotation.z}
+          onValueChange={(value) => {
+            handleRotationChange('z', value)
+          }}
         />
       </div>
     </ShapeProp>
 
     <ShapeProp label='Scale'>
-      <div className="shape-prop-point3">
-        <NumberInput
-          label='X'
-          labelColor='#6d5e00'
-          value={1}
-          onValueChange={(value) => console.log('Scale', value)}
-        />
-        <NumberInput
-          label='Y'
-          labelColor='#a43073'
-          value={1}
-          onValueChange={(value) => console.log('Scale', value)}
-        />
-        <NumberInput
-          label='Z'
-          labelColor='#0060ac'
-          value={1}
-          onValueChange={(value) => console.log('Scale', value)}
-        />
-      </div>
+      <RangeInput
+        labelColor='#0060ac'
+        range={{ min: 0.1, max: 10 }}
+        step={0.1}
+        value={shapeData.node.scale}
+        onValueChange={(value) => {
+          if (!(shapeData?.node instanceof Shape)) return
+          shapeData.node.scale = value
+          store.setState({ ...uiStore })
+        }}
+      />
     </ShapeProp>
 
     <ShapeProp label='Material'>

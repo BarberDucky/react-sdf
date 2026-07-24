@@ -91,6 +91,7 @@ const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', va
 const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
+const uTexelCount = webGlContext.registerUniform('iTexelCount', {type: '1i', value: TEXEL_COUNT}) as Uniform1i
 const uShapeCount = webGlContext.registerUniform('iShapeCount', {type: '1i', value: shapeController.flatShapeList.length}) as Uniform1i
 
 const listTex = webGlContext.createDataTexture()

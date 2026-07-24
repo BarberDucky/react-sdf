@@ -22,6 +22,7 @@ export class SdfRenderer {
       uniform vec3 iCameraOrigin;
       uniform vec3 iLookAt;
       uniform bool iIsGizmoEnabled;
+      uniform int iTexelCount;
 
       uniform int iShapeCount;
 
@@ -133,15 +134,13 @@ export class SdfRenderer {
         }
 
         // SHAPES
-
-        int texelWidth = 4;
         
         float shapeDist = 1000.;
 
         for (int i = 0; i < iShapeCount; i++) {
-          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
-          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
-          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xyz;
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
             // skip group
@@ -202,11 +201,9 @@ export class SdfRenderer {
         int sp = 0;
         float stack[12];
 
-        int texelWidth = 4;
-
         for (int i = 0; i < iShapeCount; i++) {
-          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
-          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
 
@@ -282,7 +279,6 @@ export class SdfRenderer {
 
         // SHAPES
 
-        int texelWidth = 4;
         MaterialDist shapesMat = MaterialDist(
           vec3(1.),
           true,
@@ -291,10 +287,10 @@ export class SdfRenderer {
         MaterialDist m;
 
         for (int i = 0; i < iShapeCount; i++) {
-          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
-          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
-          vec3 color = texelFetch(iSampler1, ivec2(2 + i * texelWidth, 0), 0).rgb;
-          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * texelWidth, 0), 0).xyz;
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+          vec3 color = texelFetch(iSampler1, ivec2(2 + i * iTexelCount, 0), 0).rgb;
+          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
 
@@ -384,12 +380,10 @@ export class SdfRenderer {
         int sp = 0;
         MaterialDist stack[12];
 
-        int texelWidth = 4;
-
         for (int i = 0; i < iShapeCount; i++) {
-          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * texelWidth, 0), 0);
-          vec3 position = texelFetch(iSampler1, ivec2(1 + i * texelWidth, 0), 0).xyz;
-          vec3 color = texelFetch(iSampler1, ivec2(2 + i * texelWidth, 0), 0).rgb;
+          vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
+          vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+          vec3 color = texelFetch(iSampler1, ivec2(2 + i * iTexelCount, 0), 0).rgb;
 
           if (typeExtra.x < 0.5) {
 

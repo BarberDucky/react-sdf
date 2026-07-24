@@ -166,8 +166,8 @@ const ShapeProperties = () => {
     <ShapeProp label='Roundness'>
       <RangeInput
         labelColor='#0060ac'
-        range={{ min: 0, max: 10 }}
-        step={0.05}
+        range={{ min: 0, max: 100 }}
+        step={1}
         value={shapeData.node.roundness}
         onValueChange={(value) => {
           if (!(shapeData?.node instanceof Shape)) return

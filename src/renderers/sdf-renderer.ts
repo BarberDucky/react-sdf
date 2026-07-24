@@ -147,14 +147,16 @@ export class SdfRenderer {
             // skip group
           } else if (typeExtra.x < 1.5) {
             
-            float m = sdSphere(p - position, typeExtra.y);
-            m = opRound(m, operationRound.z);
+            float m = sdSphere(p - position, typeExtra.y - typeExtra.y * operationRound.z / 100.);
+            m = opRound(m, typeExtra.y * operationRound.z / 100.);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
 
           } else if (typeExtra.x < 2.5) {
             
-            float m = sdBox(p - position, typeExtra.yzw);
-            m = opRound(m, operationRound.z);
+            float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
+            
+            float m = sdBox(p - position, typeExtra.yzw - vec3(minDim * operationRound.z / 100.));
+            m = opRound(m, minDim * operationRound.z / 100.);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
             
           }
@@ -303,9 +305,9 @@ export class SdfRenderer {
             m = MaterialDist(
               color,
               true,
-              sdSphere(p - position, typeExtra.y)
+              sdSphere(p - position, typeExtra.y - typeExtra.y * operationRound.z / 100.)
             );
-            m.dist = opRound(m.dist, operationRound.z);
+            m.dist = opRound(m.dist, typeExtra.y * operationRound.z / 100.);
             
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
@@ -313,12 +315,14 @@ export class SdfRenderer {
 
           } else if (typeExtra.x < 2.5) {
             
+            float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
+            
             MaterialDist m = MaterialDist(
               color,
               true,
-              sdBox(p - position, typeExtra.yzw)
+              sdBox(p - position, typeExtra.yzw - vec3(minDim * operationRound.z / 100.))
             );
-            m.dist = opRound(m.dist, operationRound.z);
+            m.dist = opRound(m.dist, minDim * operationRound.z / 100.);
 
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;

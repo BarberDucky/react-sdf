@@ -9,12 +9,14 @@ export class Sphere extends Shape {
   constructor(
     public id: string,
     public position: Point3,
+    public rotation: Point3,
+    public scale: number,
     public color: Point3,
     public radius: number,
     public operation: Operation,
     public roundness: number,
   ) {
-    super(id, position, color, operation, roundness)
+    super(id, position, rotation, scale, color, operation, roundness)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {
@@ -30,12 +32,14 @@ export class Box extends Shape {
   constructor(
     public id: string,
     public position: Point3,
+    public rotation: Point3,
+    public scale: number,
     public color: Point3,
     public dimensions: Point3,
     public operation: Operation,
     public roundness: number,
   ) {
-    super(id, position, color, operation, roundness)
+    super(id, position, rotation, scale, color, operation, roundness)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {

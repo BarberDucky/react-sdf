@@ -20,6 +20,8 @@ export abstract class Shape extends ShapeTreeNode {
   constructor(
     public id: string,
     public position: Point3,
+    public rotation: Point3,
+    public scale: number,
     public color: Point3,
     public operation: Operation,
     public roundness: number,

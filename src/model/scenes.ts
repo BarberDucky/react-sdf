@@ -6,6 +6,8 @@ op1.addNodes(
   new Sphere(
     'shp0',
     { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    1,
     { x: 0., y: 0., z: 1. },
     1,
     { type: 'union' },
@@ -14,6 +16,8 @@ op1.addNodes(
   new Sphere(
     'shp1',
     { x: 0., y: 1.2, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    1,
     { x: 1, y: 0, z: 0 },
     1,
     { type: 'union' },
@@ -27,6 +31,8 @@ op2.addNodes(
   new Sphere(
     'shp2',
     { x: 1.2, y: 0, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    1,
     { x: 0, y: 1, z: 0 },
     1,
     { type: 'union' },

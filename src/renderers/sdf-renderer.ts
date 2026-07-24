@@ -43,6 +43,18 @@ export class SdfRenderer {
         float c = cos(angle);
         return mat2(c, -s, s, c);
       }
+      
+      mat3 rotateXYZ(vec3 a) {
+        float sx = sin(a.x), cx = cos(a.x);
+        float sy = sin(a.y), cy = cos(a.y);
+        float sz = sin(a.z), cz = cos(a.z);
+    
+        mat3 rx = mat3(1.0, 0.0, 0.0,  0.0, cx, -sx,  0.0, sx, cx);
+        mat3 ry = mat3(cy, 0.0, sy,    0.0, 1.0, 0.0,  -sy, 0.0, cy);
+        mat3 rz = mat3(cz, -sz, 0.0,   sz, cz, 0.0,    0.0, 0.0, 1.0);
+    
+        return rz * ry * rx; // apply X, then Y, then Z
+      }
 
       float opUnion( float d1, float d2 )
       {
@@ -140,22 +152,25 @@ export class SdfRenderer {
         for (int i = 0; i < iShapeCount; i++) {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
           vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
-          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyz;
+          vec4 rotationScale = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0);
+          vec3 operationRound = texelFetch(iSampler1, ivec2(4 + i * iTexelCount, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
             // skip group
           } else if (typeExtra.x < 1.5) {
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
             
-            float m = sdSphere(p - position, typeExtra.y - typeExtra.y * operationRound.z / 100.);
-            m = opRound(m, typeExtra.y * operationRound.z / 100.);
+            float m = sdSphere((rotP - position) / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w;
+            m = opRound(m, typeExtra.y * operationRound.z / 100. * rotationScale.w);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
 
           } else if (typeExtra.x < 2.5) {
             
             float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
             
-            float m = sdBox(p - position, typeExtra.yzw - vec3(minDim * operationRound.z / 100.));
-            m = opRound(m, minDim * operationRound.z / 100.);
+            float m = sdBox((rotP - position) / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w;
+            m = opRound(m, minDim * operationRound.z / 100. * rotationScale.w);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
             
           }
@@ -290,35 +305,37 @@ export class SdfRenderer {
           vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
           vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
           vec3 color = texelFetch(iSampler1, ivec2(2 + i * iTexelCount, 0), 0).rgb;
-          vec3 operationRound = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyz;
+          vec4 rotationScale = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyzw;
+          vec3 operationRound = texelFetch(iSampler1, ivec2(4 + i * iTexelCount, 0), 0).xyz;
 
           if (typeExtra.x < 0.5) {
 
             // skip group
 
           } else if (typeExtra.x < 1.5) {
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
             
             m = MaterialDist(
               color,
               true,
-              sdSphere(p - position, typeExtra.y - typeExtra.y * operationRound.z / 100.)
+              sdSphere((rotP - position) / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w
             );
-            m.dist = opRound(m.dist, typeExtra.y * operationRound.z / 100.);
+            m.dist = opRound(m.dist, typeExtra.y * operationRound.z / 100. * rotationScale.w);
             
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;
             shapesMat.dist = doOperation(operationRound.xy, shapesMat.dist, m.dist);
 
           } else if (typeExtra.x < 2.5) {
-            
             float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
             
             MaterialDist m = MaterialDist(
               color,
               true,
-              sdBox(p - position, typeExtra.yzw - vec3(minDim * operationRound.z / 100.))
+              sdBox((rotP - position) / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w
             );
-            m.dist = opRound(m.dist, minDim * operationRound.z / 100.);
+            m.dist = opRound(m.dist, minDim * operationRound.z / 100. * rotationScale.w);
 
             shapesMat.color = m.dist < shapesMat.dist ? m.color : shapesMat.color;
             shapesMat.isLit = m.dist < shapesMat.dist ? m.isLit : shapesMat.isLit;

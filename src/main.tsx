@@ -50,6 +50,8 @@ mouseMovementManager.addClickCallback(() => {
   if (activeShape === 'sphere') {
     shapeController.addSphere(
       { x: 0, y: 0, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      1,
       0.5,
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },
@@ -59,6 +61,8 @@ mouseMovementManager.addClickCallback(() => {
   if (activeShape === 'box') {
     shapeController.addBox(
       { x: 0, y: 0, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      1,
       { x: 1, y: 1, z: 1 },
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },

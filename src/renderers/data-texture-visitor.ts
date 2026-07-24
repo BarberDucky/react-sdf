@@ -37,7 +37,8 @@ export class DataTextureVisitor extends Visitor<Float32Array, undefined> {
     data.set([TextureShapeType.Sphere, s.radius])
     data.set([s.position.x, s.position.y, s.position.z], DATA_TEXT_ROW_SIZE)
     data.set([s.color.x, s.color.y, s.color.z], DATA_TEXT_ROW_SIZE * 2)
-    data.set([OPERATION_MAPPER[s.operation.type], s.operation?.smoothness ?? 0, s.roundness], DATA_TEXT_ROW_SIZE * 3)
+    data.set([s.rotation.x, s.rotation.y, s.rotation.z, s.scale], DATA_TEXT_ROW_SIZE * 3)
+    data.set([OPERATION_MAPPER[s.operation.type], s.operation?.smoothness ?? 0, s.roundness], DATA_TEXT_ROW_SIZE * 4)
 
     return data
   }
@@ -48,7 +49,8 @@ export class DataTextureVisitor extends Visitor<Float32Array, undefined> {
     data.set([TextureShapeType.Box, b.dimensions.x, b.dimensions.y, b.dimensions.z])
     data.set([b.position.x, b.position.y, b.position.z], DATA_TEXT_ROW_SIZE)
     data.set([b.color.x, b.color.y, b.color.z], DATA_TEXT_ROW_SIZE * 2)
-    data.set([OPERATION_MAPPER[b.operation.type], b.operation?.smoothness ?? 0, b.roundness], DATA_TEXT_ROW_SIZE * 3)
+    data.set([b.rotation.x, b.rotation.y, b.rotation.z, b.scale], DATA_TEXT_ROW_SIZE * 3)
+    data.set([OPERATION_MAPPER[b.operation.type], b.operation?.smoothness ?? 0, b.roundness], DATA_TEXT_ROW_SIZE * 4)
 
     return data
   }

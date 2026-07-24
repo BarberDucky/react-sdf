@@ -158,18 +158,18 @@ export class SdfRenderer {
           if (typeExtra.x < 0.5) {
             // skip group
           } else if (typeExtra.x < 1.5) {
-            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * (p - position);
             
-            float m = sdSphere((rotP - position) / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w;
+            float m = sdSphere(rotP / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w;
             m = opRound(m, typeExtra.y * operationRound.z / 100. * rotationScale.w);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
 
           } else if (typeExtra.x < 2.5) {
             
             float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
-            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * (p - position);
             
-            float m = sdBox((rotP - position) / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w;
+            float m = sdBox(rotP / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w;
             m = opRound(m, minDim * operationRound.z / 100. * rotationScale.w);
             shapeDist = doOperation(operationRound.xy, shapeDist, m);
             
@@ -313,12 +313,12 @@ export class SdfRenderer {
             // skip group
 
           } else if (typeExtra.x < 1.5) {
-            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * (p - position);
             
             m = MaterialDist(
               color,
               true,
-              sdSphere((rotP - position) / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w
+              sdSphere(rotP / rotationScale.w, typeExtra.y - typeExtra.y * operationRound.z / 100.) * rotationScale.w
             );
             m.dist = opRound(m.dist, typeExtra.y * operationRound.z / 100. * rotationScale.w);
             
@@ -328,12 +328,12 @@ export class SdfRenderer {
 
           } else if (typeExtra.x < 2.5) {
             float minDim = min(min(typeExtra.y, typeExtra.z), typeExtra.w);
-            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * p;
+            vec3 rotP = rotateXYZ(-vec3(rotationScale.x, rotationScale.y, rotationScale.z)) * (p - position);
             
             MaterialDist m = MaterialDist(
               color,
               true,
-              sdBox((rotP - position) / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w
+              sdBox(rotP / rotationScale.w, typeExtra.yzw - vec3(minDim * operationRound.z / 100.)) * rotationScale.w
             );
             m.dist = opRound(m.dist, minDim * operationRound.z / 100. * rotationScale.w);
 

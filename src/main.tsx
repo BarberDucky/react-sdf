@@ -12,6 +12,7 @@ import { createRoot } from "react-dom/client"
 import { Store } from "./store"
 import { generateListShaderTextures } from "./renderers/generate-data-textures.ts";
 import { TEXEL_COUNT } from "./renderers/consts.ts";
+import { getShapeAtPoint } from "./renderers/cpu-raymarcher.ts";
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -44,8 +45,26 @@ const camera = new Camera(
   { x: 0, y: 0, z: 0 }
 )
 
-mouseMovementManager.addClickCallback(() => {
+mouseMovementManager.addClickCallback(p => {
   const activeShape = store.getState().selectedShape
+
+  if (activeShape == null) {
+
+    const shapeId = getShapeAtPoint(
+      p,
+      { x: canvas.width, y: canvas.height },
+      { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+      { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+      shapeController.flatShapeList,
+    )
+
+    store.setState({
+      ...store.getState(),
+      selectedExistingShape: shapeId == store.getState().selectedExistingShape
+        ? null
+        : shapeId,
+    })
+  }
 
   if (activeShape === 'sphere') {
     shapeController.addSphere(

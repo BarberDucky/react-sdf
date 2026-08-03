@@ -1,8 +1,8 @@
-import { useSyncExternalStore } from "react"
-import { UiShape } from "../ui"
-import { ShapeSelectButton } from "./button"
+import { useSyncExternalStore } from 'react'
+import { UiShape } from '../ui'
+import { ShapeSelectButton } from './button'
 import './shape-select.css'
-import { store } from "../../main"
+import { store } from '../../main'
 
 const ShapeSelect = () => {
 

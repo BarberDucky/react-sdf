@@ -1,5 +1,5 @@
-import { Point3 } from "./utils";
-import { vector3Add, vector3Cross, vector3Length, vector3Normalize, vector3Scale, vector3Subtract } from "./vector3";
+import { Point3 } from './utils'
+import { vector3Add, vector3Cross, vector3Length, vector3Normalize, vector3Scale, vector3Subtract } from './vector3'
 
 export class Camera {
 
@@ -85,5 +85,6 @@ export class Camera {
   }
 
   public getOrigin() { return this.origin }
+
   public getTarget() { return this.target }
 } 

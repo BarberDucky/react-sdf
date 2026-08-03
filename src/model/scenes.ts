@@ -1,7 +1,7 @@
-import { Group, ShapeTreeNode } from "./shape-tree";
-import { Sphere } from "./shapes";
+import { Group, ShapeTreeNode } from './shape-tree'
+import { Sphere } from './shapes'
 
-const op1 = new Group('op1', { type: "union" })
+const op1 = new Group('op1', { type: 'union' })
 op1.addNodes(
   new Sphere(
     'shp0',
@@ -25,7 +25,7 @@ op1.addNodes(
   ),
 )
 
-const op2 = new Group('op2', { type: "union", smoothness: 1.1 })
+const op2 = new Group('op2', { type: 'union', smoothness: 1.1 })
 op2.addNodes(
   op1,
   new Sphere(

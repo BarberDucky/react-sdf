@@ -1,4 +1,4 @@
-import { Point3 } from "./utils"
+import { Point3 } from './utils'
 
 type Movements =
   'Forward' |
@@ -67,11 +67,11 @@ export default class KeyboardMovementManager {
     })
 
     document.addEventListener('keyup', e => {
-      
+
       if (e.key == 'Shift') {
         this.isShiftPressed = false
       }
-      
+
       const pressedKey = this.KEY_TO_MOVEMENT_MAP[e.key]
 
       if (pressedKey == null) { return }

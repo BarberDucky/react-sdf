@@ -3,8 +3,8 @@ import './button-input.css'
 
 function ButtonInput<T>(props: {
   type: T
-	label: string,
-	icon: SetIconType,
+  label: string,
+  icon: SetIconType,
   isSelected: boolean,
   onClick: (type: T) => void,
 }) {

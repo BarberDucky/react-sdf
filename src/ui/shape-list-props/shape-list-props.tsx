@@ -32,13 +32,13 @@ const ShapeListProps = () => {
     </button>
   ))
 
-  const shapeProps = <Card title="Properties" icon={<TuneIcon />}>
-    <ShapeProperties />
+  const shapeProps = <Card title="Properties" icon={<TuneIcon/>}>
+    <ShapeProperties/>
   </Card>
 
   return (
     <div className="shape-list-props">
-      <Card title="Combination Tree" icon={<TreeIcon />}>
+      <Card title="Combination Tree" icon={<TreeIcon/>}>
         {shapeButtons}
       </Card>
       {uiStore.selectedExistingShape != null ? shapeProps : null}

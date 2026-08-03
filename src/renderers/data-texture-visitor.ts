@@ -1,7 +1,7 @@
-import { Group, Operation } from "../model/shape-tree";
-import { Box, Sphere } from "../model/shapes";
-import { Visitor } from "../model/visitor";
-import { DATA_TEXT_ROW_SIZE, TEXEL_COUNT } from "./consts.ts";
+import { Group, Operation } from '../model/shape-tree'
+import { Box, Sphere } from '../model/shapes'
+import { Visitor } from '../model/visitor'
+import { DATA_TEXT_ROW_SIZE, TEXEL_COUNT } from './consts.ts'
 
 enum TextureShapeType {
   Group = 0,

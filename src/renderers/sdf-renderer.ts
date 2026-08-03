@@ -1,5 +1,4 @@
-import { Group } from "../model/shape-tree"
-import { dedent } from "../utils"
+import { dedent } from '../utils'
 
 export class SdfRenderer {
 

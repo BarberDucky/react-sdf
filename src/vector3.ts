@@ -1,4 +1,4 @@
-import { Mat3, Point3 } from "./utils"
+import { Mat3, Point3 } from './utils'
 
 export function vector3Add(a: Point3, b: Point3): Point3 {
   return {
@@ -60,14 +60,14 @@ export function vector3Max(a: Point3, b: number) {
   }
 }
 
-export function rotateXYZ(a: Point3): Mat3  {
-  const sx = Math.sin(a.x), cx = Math.cos(a.x);
-  const sy = Math.sin(a.y), cy = Math.cos(a.y);
-  const sz = Math.sin(a.z), cz = Math.cos(a.z);
+export function rotateXYZ(a: Point3): Mat3 {
+  const sx = Math.sin(a.x), cx = Math.cos(a.x)
+  const sy = Math.sin(a.y), cy = Math.cos(a.y)
+  const sz = Math.sin(a.z), cz = Math.cos(a.z)
 
-  const rx = new Mat3([1.0, 0.0, 0.0,  0.0, cx, -sx,  0.0, sx, cx])
-  const ry = new Mat3([cy, 0.0, sy,    0.0, 1.0, 0.0,  -sy, 0.0, cy])
-  const rz = new Mat3([cz, -sz, 0.0,   sz, cz, 0.0,    0.0, 0.0, 1.0])
+  const rx = new Mat3([1.0, 0.0, 0.0, 0.0, cx, -sx, 0.0, sx, cx])
+  const ry = new Mat3([cy, 0.0, sy, 0.0, 1.0, 0.0, -sy, 0.0, cy])
+  const rz = new Mat3([cz, -sz, 0.0, sz, cz, 0.0, 0.0, 0.0, 1.0])
 
   return rz.multiplyMatrix(ry.multiplyMatrix(rx))
 }

@@ -1,6 +1,6 @@
-import { Group, ShapeTreeNode } from "../model/shape-tree";
-import { DataTextureVisitor } from "./data-texture-visitor";
-import { DATA_TEXT_ROW_SIZE, TEXEL_COUNT } from "./consts.ts";
+import { Group, ShapeTreeNode } from '../model/shape-tree'
+import { DataTextureVisitor } from './data-texture-visitor'
+import { DATA_TEXT_ROW_SIZE, TEXEL_COUNT } from './consts.ts'
 
 export function generateTreeShaderTextures(root: Group, shapeCount: number) {
 
@@ -49,7 +49,7 @@ export function generateListShaderTextures(root: Group, shapeCount: number) {
       for (let i = curr.node.nodes.length - 1; i >= 0; i--) {
         queue.push({
           node: curr.node.nodes[i],
-          depth: curr.depth + 1
+          depth: curr.depth + 1,
         })
       }
     }

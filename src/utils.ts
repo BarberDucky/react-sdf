@@ -5,7 +5,7 @@ export class Mat3 {
 
   constructor(public m: number[]) {
     if (m.length !== 9) {
-      throw new Error("Mat3 requires exactly 9 elements")
+      throw new Error('Mat3 requires exactly 9 elements')
     }
   }
 
@@ -58,11 +58,11 @@ export function point3ToVec3(value: Point3) {
 }
 
 export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
+  return Math.min(Math.max(value, min), max)
 }
 
 export function mix(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
+  return a + (b - a) * t
 }
 
 export function hexToRgb(hex: string) {

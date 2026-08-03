@@ -9,7 +9,7 @@ const Header = () => {
   return (
     <header>
       <h1 className="header-title">React SDF Renderer</h1>
-      <div className='gizmo-button-container'>
+      <div className="gizmo-button-container">
         <button
           className={`gizmo-button ${uiStore.isGizmoEnabled ? 'gizmo-selected' : ''}`}
           onClick={() => {

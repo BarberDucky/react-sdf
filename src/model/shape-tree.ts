@@ -1,5 +1,5 @@
-import { Point3 } from "../utils";
-import { Visitor } from "./visitor";
+import { Point3 } from '../utils'
+import { Visitor } from './visitor'
 
 export interface Operation {
   type: 'union' | 'difference' | 'intersection'
@@ -10,9 +10,9 @@ export abstract class ShapeTreeNode {
 
   abstract id: string
   abstract type: string
-  abstract accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult
-
   parent: Group | null = null
+
+  abstract accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult
 
 }
 
@@ -31,13 +31,12 @@ export abstract class Shape extends ShapeTreeNode {
 export class Group extends ShapeTreeNode {
 
   type = 'Group'
+  private shapeNodes: Array<ShapeTreeNode> = []
 
   constructor(
     public id: string,
     public operation: Operation,
   ) { super() }
-
-  private shapeNodes: Array<ShapeTreeNode> = []
 
   public get nodes() {
     return this.shapeNodes

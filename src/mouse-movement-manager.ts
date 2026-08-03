@@ -1,4 +1,4 @@
-import { Point2 } from "./utils"
+import { Point2 } from './utils'
 
 export default class MouseMovementManager {
 
@@ -25,9 +25,9 @@ export default class MouseMovementManager {
       if (this.clickStart != null) {
         const distance = Math.sqrt(
           Math.pow(this.clickStart.x - e.clientX, 2) +
-          Math.pow(this.clickStart.y - e.clientY, 2)
+          Math.pow(this.clickStart.y - e.clientY, 2),
         )
-        
+
         if (distance < 1) {
           for (const fn of this.clickCallbacks) {
             fn(this.clickStart)

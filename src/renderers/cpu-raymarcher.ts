@@ -1,9 +1,9 @@
-import { Point2, Point3 } from "../utils.ts"
-import { FlatShapeListEntry } from "../model/shape-controller.ts"
-import { Group } from "../model/shape-tree.ts"
-import { Box, Sphere } from "../model/shapes.ts"
-import { rotateXYZ, vector3Normalize } from "../vector3.ts"
-import { doOperation, opRound, sdBox, sdSphere, setCamera } from "./cpu-sdf-utils.ts"
+import { Point2, Point3 } from '../utils.ts'
+import { FlatShapeListEntry } from '../model/shape-controller.ts'
+import { Group } from '../model/shape-tree.ts'
+import { Box, Sphere } from '../model/shapes.ts'
+import { rotateXYZ, vector3Normalize } from '../vector3.ts'
+import { doOperation, opRound, sdBox, sdSphere, setCamera } from './cpu-sdf-utils.ts'
 
 export function normalizeMouseCoordinates(x: number, y: number, canvas: HTMLCanvasElement) {
   const cd = canvas.getBoundingClientRect()
@@ -127,7 +127,7 @@ export function getShapeAtPoint(point: Point2, resolution: Point2, cameraOrigin:
 
     t += d.shapeDist
 
-    if (d.shapeDist < .001) break;
+    if (d.shapeDist < .001) break
 
     if (t > 1000.) {
       return null

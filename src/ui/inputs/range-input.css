@@ -1,38 +1,38 @@
 .range-input {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	font-family: Plus Jakarta Sans;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Plus Jakarta Sans;
 }
 
-.range-input>input {
-	margin-top: 10px;
-	width: 100%;
+.range-input > input {
+  margin-top: 10px;
+  width: 100%;
 }
 
-.range-input>input:focus {
-	outline-color: #acacac;
+.range-input > input:focus {
+  outline-color: #acacac;
 }
 
 .range-input-labels {
-	width: 100%;
-	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	column-gap: 0.5em;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  column-gap: 0.5em;
 }
 
 .range-input-value {
-	justify-self: center;
-	font-weight: bold;
-	font-size: 0.8em;
+  justify-self: center;
+  font-weight: bold;
+  font-size: 0.8em;
 }
 
 .range-input-left {
-	justify-self: start;
-	font-size: 0.65em;
+  justify-self: start;
+  font-size: 0.65em;
 }
 
 .range-input-right {
-	justify-self: end;
-	font-size: 0.65em;
+  justify-self: end;
+  font-size: 0.65em;
 }

@@ -1,6 +1,6 @@
-import { Box, Sphere } from "./shapes.ts";
-import { Point3 } from "../utils";
-import { Group, Operation, ShapeTreeNode } from "./shape-tree";
+import { Box, Sphere } from './shapes.ts'
+import { Point3 } from '../utils'
+import { Group, Operation, ShapeTreeNode } from './shape-tree'
 
 export interface FlatShapeListEntry {
   id: string,
@@ -14,7 +14,7 @@ export class ShapeController {
   private lastId = 0
 
   constructor(
-    private root: Group = new Group('root', { type: 'union' })
+    private root: Group = new Group('root', { type: 'union' }),
   ) { }
 
   get rootOperation(): Group {
@@ -39,13 +39,19 @@ export class ShapeController {
         for (let i = curr.node.nodes.length - 1; i >= 0; i--) {
           queue.push({
             node: curr.node.nodes[i],
-            depth: curr.depth + 1
+            depth: curr.depth + 1,
           })
         }
       }
     }
 
     return res
+  }
+
+  private get newId() {
+    const lastId = this.lastId
+    this.lastId++
+    return lastId
   }
 
   getShapeById(id: string): ShapeTreeNode | undefined {
@@ -89,12 +95,6 @@ export class ShapeController {
     )
     this.root.addNodes(group)
     return group
-  }
-
-  private get newId() {
-    const lastId = this.lastId
-    this.lastId++
-    return lastId
   }
 
 }

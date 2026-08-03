@@ -1,17 +1,17 @@
 import './shape-list.css'
-import { FlatShapeListEntry } from "../../model/shape-controller"
+import { FlatShapeListEntry } from '../../model/shape-controller'
 
-const ShapeList = (props: { 
+const ShapeList = (props: {
   selectedShapeId: string | null,
   onSelectShape: (shapeId: string) => void
   shapeList: Array<FlatShapeListEntry>
 }) => {
-  
+
 
   console.log(props.selectedShapeId)
 
   const shapeButtons = props.shapeList.map(shape => (
-    <button 
+    <button
       key={shape.id}
       onClick={() => props.onSelectShape(shape.id)}
       className={`
@@ -19,11 +19,11 @@ const ShapeList = (props: {
         ${shape.id == props.selectedShapeId ? 'selected' : ''}
         `}
     >
-      {`${Array.from({length: shape.depth}).fill('-')}`}
+      {`${Array.from({ length: shape.depth }).fill('-')}`}
       {shape.type}
     </button>
   ))
-  
+
   return (
     <div className="shape-list">
       {shapeButtons}

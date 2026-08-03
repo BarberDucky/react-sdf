@@ -1,4 +1,4 @@
-import { Point2, Point3 } from "../utils"
+import { Point2, Point3 } from '../utils'
 
 type UniformValue =
   | { type: '1i', value: number }
@@ -208,7 +208,7 @@ export class WebGlContext {
       0,
       this._gl.RGBA,
       this._gl.FLOAT,
-      data
+      data,
     )
   }
 

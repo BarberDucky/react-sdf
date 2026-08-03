@@ -1,6 +1,6 @@
-import { clamp, Mat3, mix, Point3 } from "../utils.ts";
-import { vector3Cross, vector3Length, vector3Max, vector3Normalize, vector3Subtract } from "../vector3.ts";
-import { Operation } from "../model/shape-tree.ts";
+import { clamp, Mat3, mix, Point3 } from '../utils.ts'
+import { vector3Cross, vector3Length, vector3Max, vector3Normalize, vector3Subtract } from '../vector3.ts'
+import { Operation } from '../model/shape-tree.ts'
 
 export function sdSphere(p: Point3, s: number) {
   return vector3Length(p) - s
@@ -21,26 +21,26 @@ export function opRound(d: number, rad: number) {
 
 export function doOperation(opData: Operation, d1: number, d2: number) {
   if (opData.type == 'union') {
-    return opSmoothUnion(d1, d2, opData.smoothness ?? 0);
+    return opSmoothUnion(d1, d2, opData.smoothness ?? 0)
   } else if (opData.type == 'difference') {
-    return opSmoothSubtraction(d1, d2, opData.smoothness ?? 0);
+    return opSmoothSubtraction(d1, d2, opData.smoothness ?? 0)
   } else if (opData.type == 'intersection') {
-    return opSmoothIntersection(d1, d2, opData.smoothness ?? 0);
+    return opSmoothIntersection(d1, d2, opData.smoothness ?? 0)
   }
   return d1
 }
 
 export function opSmoothUnion(d1: number, d2: number, k: number) {
-  const h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
-  return mix(d2, d1, h) - k * h * (1.0 - h);
+  const h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0)
+  return mix(d2, d1, h) - k * h * (1.0 - h)
 }
 
 export function opSmoothSubtraction(a: number, b: number, k: number) {
-  return -opSmoothUnion(a, -b, k);
+  return -opSmoothUnion(a, -b, k)
 }
 
 export function opSmoothIntersection(a: number, b: number, k: number) {
-  return -opSmoothUnion(-a, -b, k);
+  return -opSmoothUnion(-a, -b, k)
 }
 
 export function setCamera(target: Point3, position: Point3) {

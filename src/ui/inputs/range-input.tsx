@@ -1,4 +1,4 @@
-import "./range-input.css";
+import './range-input.css'
 
 function RangeInput(props: {
   labelColor: string;
@@ -17,7 +17,7 @@ function RangeInput(props: {
         max={props.range.max}
         value={props.value}
         onChange={(e) => {
-          props.onValueChange(Number.parseFloat(e.target.value));
+          props.onValueChange(Number.parseFloat(e.target.value))
         }}
       />
       <div className="range-input-labels">
@@ -26,7 +26,7 @@ function RangeInput(props: {
         <span className="range-input-right">{props.range.max}</span>
       </div>
     </div>
-  );
+  )
 }
 
-export default RangeInput;
+export default RangeInput

@@ -1,18 +1,18 @@
-import { Camera } from "./camera"
-import { initializeCanvas, resizeCanvasToDisplaySize } from "./canvas/canvas-utils"
-import KeyboardMovementManager from "./keyboard-movement-manager"
-import { FlatShapeListEntry, ShapeController } from "./model/shape-controller"
-import MouseMovementManager from "./mouse-movement-manager"
+import { Camera } from './camera'
+import { initializeCanvas, resizeCanvasToDisplaySize } from './canvas/canvas-utils'
+import KeyboardMovementManager from './keyboard-movement-manager'
+import { FlatShapeListEntry, ShapeController } from './model/shape-controller'
+import MouseMovementManager from './mouse-movement-manager'
 import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
-import Ui from "./ui/ui"
-import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from "./webgl/webgl-context"
+import Ui from './ui/ui'
+import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from './webgl/webgl-context'
 
-import { createRoot } from "react-dom/client"
-import { Store } from "./store"
-import { generateListShaderTextures } from "./renderers/generate-data-textures.ts";
-import { TEXEL_COUNT } from "./renderers/consts.ts";
-import { getShapeAtPoint } from "./renderers/cpu-raymarcher.ts";
+import { createRoot } from 'react-dom/client'
+import { Store } from './store'
+import { generateListShaderTextures } from './renderers/generate-data-textures.ts'
+import { TEXEL_COUNT } from './renderers/consts.ts'
+import { getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
 
 const shapeController = new ShapeController()
 const sdfRenderer = new SdfRenderer()
@@ -37,12 +37,12 @@ export const store = new Store<AppStoreModel>({
 const webGlContext = new WebGlContext(
   canvas,
   sdfRenderer.generateVertexShaderString(),
-  sdfRenderer.generateFragmentShaderString()
+  sdfRenderer.generateFragmentShaderString(),
 )
 
 const camera = new Camera(
   { x: 3, y: 3, z: -3 },
-  { x: 0, y: 0, z: 0 }
+  { x: 0, y: 0, z: 0 },
 )
 
 mouseMovementManager.addClickCallback(p => {
@@ -114,8 +114,8 @@ const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', va
 const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
 const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
 const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
-const uTexelCount = webGlContext.registerUniform('iTexelCount', {type: '1i', value: TEXEL_COUNT}) as Uniform1i
-const uShapeCount = webGlContext.registerUniform('iShapeCount', {type: '1i', value: shapeController.flatShapeList.length}) as Uniform1i
+const uTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT }) as Uniform1i
+const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }) as Uniform1i
 
 const listTex = webGlContext.createDataTexture()
 
@@ -142,5 +142,5 @@ animate()
 const reactRoot = createRoot(document.getElementById('reactRoot')!)
 
 reactRoot.render(
-    <Ui />
+  <Ui/>,
 )

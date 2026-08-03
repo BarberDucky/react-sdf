@@ -12,6 +12,7 @@ import { Store } from './store'
 import { generateListShaderTextures } from './renderers/generate-data-textures.ts'
 import { TEXEL_COUNT } from './renderers/consts.ts'
 import { getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
+import { Box, Sphere } from './model/shapes.ts'
 
 const shapeController = new ShapeController()
 const keyboardMovementManager = new KeyboardMovementManager()
@@ -52,12 +53,30 @@ mouseMovementManager.addClickCallback(p => {
       shapeController.flatShapeList,
     )
 
+    const oldShapeId = store.getState().selectedExistingShape
+
     store.setState({
       ...store.getState(),
-      selectedExistingShape: shapeId == store.getState().selectedExistingShape
+      selectedExistingShape: shapeId == oldShapeId
         ? null
         : shapeId,
     })
+
+    if (oldShapeId != null) {
+      const oldSelectedShape = shapeController.getShapeById(oldShapeId)
+      if (oldSelectedShape instanceof Sphere || oldSelectedShape instanceof Box) {
+        oldSelectedShape.isSelected = false
+      }
+    }
+
+    if (shapeId == null) {
+      return
+    }
+
+    const selectedShape = shapeController.getShapeById(shapeId)
+    if (selectedShape instanceof Sphere || selectedShape instanceof Box) {
+      selectedShape.isSelected = shapeId == store.getState().selectedExistingShape
+    }
   }
 
   if (activeShape === 'sphere') {
@@ -69,6 +88,7 @@ mouseMovementManager.addClickCallback(p => {
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },
       0,
+      false,
     )
   }
   if (activeShape === 'box') {
@@ -80,6 +100,7 @@ mouseMovementManager.addClickCallback(p => {
       { x: Math.random(), y: Math.random(), z: Math.random() },
       { type: 'union' },
       0,
+      false,
     )
   }
 

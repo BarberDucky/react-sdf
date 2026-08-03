@@ -4,18 +4,32 @@ import ShapeProperties from './shape-properties'
 import { TreeIcon, TuneIcon } from '../../assets/icons'
 import { useSyncExternalStore } from 'react'
 import { store } from '../../main'
+import { Box, Sphere } from '../../model/shapes.ts'
 
 const ShapeListProps = () => {
 
   const uiStore = useSyncExternalStore(store.subscribe, store.getState)
 
   function handleSelectShape(shapeId: string) {
+
+    const oldShapeId = uiStore.selectedExistingShape
+
     store.setState({
       ...uiStore,
-      selectedExistingShape: shapeId == uiStore.selectedExistingShape
+      selectedExistingShape: shapeId == oldShapeId
         ? null
         : shapeId,
     })
+
+    const oldSelectedShape = uiStore.shapesRoot.find(flatShape => flatShape.id == oldShapeId)?.node
+    if (oldSelectedShape instanceof Sphere || oldSelectedShape instanceof Box) {
+      oldSelectedShape.isSelected = false
+    }
+
+    const selectedShape = uiStore.shapesRoot.find(flatShape => flatShape.id == shapeId)?.node
+    if (selectedShape instanceof Sphere || selectedShape instanceof Box) {
+      selectedShape.isSelected = shapeId == store.getState().selectedExistingShape
+    }
   }
 
   const shapeButtons = uiStore.shapesRoot.map(shape => (

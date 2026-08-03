@@ -15,8 +15,9 @@ export class Sphere extends Shape {
     public radius: number,
     public operation: Operation,
     public roundness: number,
+    public isSelected: boolean,
   ) {
-    super(id, position, rotation, scale, color, operation, roundness)
+    super(id, position, rotation, scale, color, operation, roundness, isSelected)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {
@@ -38,8 +39,9 @@ export class Box extends Shape {
     public dimensions: Point3,
     public operation: Operation,
     public roundness: number,
+    public isSelected: boolean,
   ) {
-    super(id, position, rotation, scale, color, operation, roundness)
+    super(id, position, rotation, scale, color, operation, roundness, isSelected)
   }
 
   accept<TResult, TExtra>(v: Visitor<TResult, TExtra>, extra?: TExtra): TResult {

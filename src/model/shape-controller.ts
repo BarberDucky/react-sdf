@@ -58,7 +58,7 @@ export class ShapeController {
     return this.flatShapeList.find(element => element.id == id)?.node
   }
 
-  addSphere(position: Point3, rotation: Point3, scale: number, radius: number, color: Point3, operation: Operation, roundness: number) {
+  addSphere(position: Point3, rotation: Point3, scale: number, radius: number, color: Point3, operation: Operation, roundness: number, isSelected: boolean) {
     const sphere = new Sphere(
       'shp' + this.newId,
       position,
@@ -68,12 +68,13 @@ export class ShapeController {
       radius,
       operation,
       roundness,
+      isSelected,
     )
     this.root.addNodes(sphere)
     return sphere
   }
 
-  addBox(position: Point3, rotation: Point3, scale: number, dimensions: Point3, color: Point3, operation: Operation, roundness: number) {
+  addBox(position: Point3, rotation: Point3, scale: number, dimensions: Point3, color: Point3, operation: Operation, roundness: number, isSelected: boolean) {
     const box = new Box(
       'shp' + this.newId,
       position,
@@ -83,6 +84,7 @@ export class ShapeController {
       dimensions,
       operation,
       roundness,
+      isSelected,
     )
     this.root.addNodes(box)
     return box

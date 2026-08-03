@@ -25,6 +25,7 @@ export abstract class Shape extends ShapeTreeNode {
     public color: Point3,
     public operation: Operation,
     public roundness: number,
+    public isSelected: boolean,
   ) { super() }
 }
 

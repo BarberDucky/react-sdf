@@ -3,7 +3,6 @@ import { initializeCanvas, resizeCanvasToDisplaySize } from './canvas/canvas-uti
 import KeyboardMovementManager from './keyboard-movement-manager'
 import { FlatShapeListEntry, ShapeController } from './model/shape-controller'
 import MouseMovementManager from './mouse-movement-manager'
-import { SdfRenderer } from './renderers/sdf-renderer'
 import './style.css'
 import Ui from './ui/ui'
 import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from './webgl/webgl-context'
@@ -15,7 +14,6 @@ import { TEXEL_COUNT } from './renderers/consts.ts'
 import { getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
 
 const shapeController = new ShapeController()
-const sdfRenderer = new SdfRenderer()
 const keyboardMovementManager = new KeyboardMovementManager()
 const canvas = initializeCanvas('#mainCanvas')
 const mouseMovementManager = new MouseMovementManager(canvas)
@@ -34,11 +32,7 @@ export const store = new Store<AppStoreModel>({
   selectedExistingShape: null,
 })
 
-const webGlContext = new WebGlContext(
-  canvas,
-  sdfRenderer.generateVertexShaderString(),
-  sdfRenderer.generateFragmentShaderString(),
-)
+const webGlContext = new WebGlContext(canvas)
 
 const camera = new Camera(
   { x: 3, y: 3, z: -3 },

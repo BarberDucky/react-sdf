@@ -1,95 +1,8 @@
-import { Point2, Point3 } from '../utils'
 import { createContext, createProgram, createShader } from './helpers.ts'
+import { Uniform, Uniform1i, Uniform2f, Uniform3f, UniformBool, UniformTypeMap, UniformTypeValue } from './uniform.ts'
 
 import defaultVertexShader from '../renderers/shaders/default.vertex.glsl?raw'
 import sceneFragmentShader from '../renderers/shaders/scene.fragment.glsl?raw'
-
-type UniformValue =
-  | { type: '1i', value: number }
-  | { type: '2f', value: Point2 }
-  | { type: '3f', value: Point3 }
-  | { type: 'bool', value: boolean }
-
-export interface Uniform {
-  updateLocation: (value: WebGLUniformLocation) => void
-  accept: (gl: WebGL2RenderingContext) => void
-}
-
-export class Uniform1i implements Uniform {
-  constructor(
-    private _location: WebGLUniformLocation,
-    private _value: number,
-  ) { }
-
-  updateLocation(value: WebGLUniformLocation) {
-    this._location = (value)
-  }
-
-  updateValue(value: number) {
-    this._value = value
-  }
-
-  accept(gl: WebGL2RenderingContext) {
-    gl.uniform1i(this._location, this._value)
-  }
-}
-
-export class Uniform2f implements Uniform {
-  constructor(
-    private _location: WebGLUniformLocation,
-    private _value: Point2,
-  ) { }
-
-  updateLocation(value: WebGLUniformLocation) {
-    this._location = (value)
-  }
-
-  updateValue(value: Point2) {
-    this._value = value
-  }
-
-  accept(gl: WebGL2RenderingContext) {
-    gl.uniform2f(this._location, this._value.x, this._value.y)
-  }
-}
-
-export class Uniform3f implements Uniform {
-  constructor(
-    private _location: WebGLUniformLocation,
-    private _value: Point3,
-  ) { }
-
-  updateLocation(value: WebGLUniformLocation) {
-    this._location = (value)
-  }
-
-  updateValue(value: Point3) {
-    this._value = value
-  }
-
-  accept(gl: WebGL2RenderingContext) {
-    gl.uniform3f(this._location, this._value.x, this._value.y, this._value.z)
-  }
-}
-
-export class UniformBool implements Uniform {
-  constructor(
-    private _location: WebGLUniformLocation,
-    private _value: boolean,
-  ) { }
-
-  updateLocation(value: WebGLUniformLocation) {
-    this._location = (value)
-  }
-
-  updateValue(value: boolean) {
-    this._value = value
-  }
-
-  accept(gl: WebGL2RenderingContext) {
-    gl.uniform1i(this._location, this._value ? 1 : 0)
-  }
-}
 
 export class WebGlContext {
 
@@ -100,7 +13,7 @@ export class WebGlContext {
 
   private _maxTextureCount = 4
 
-  private _uniforms: Map<string, Uniform> = new Map()
+  private _uniforms: Map<string, Uniform<unknown>> = new Map()
   private _textureUniforms: Array<WebGLUniformLocation> = []
   private _textures: Array<WebGLTexture> = []
 
@@ -161,17 +74,31 @@ export class WebGlContext {
     this._gl.viewport(0, 0, width, height)
   }
 
-  public registerUniform(name: string, value: UniformValue): Uniform {
+  public registerUniform<T extends UniformTypeValue>(
+    name: string,
+    typeValue: T,
+  ): UniformTypeMap[T['type']]['instance'] {
     const location = this._gl.getUniformLocation(this._program, name)
+    const tv: UniformTypeValue = typeValue
 
-    const uniform = value.type == '2f'
-      ? new Uniform2f(location!, value.value)
-      : value.type == '3f'
-        ? new Uniform3f(location!, value.value)
-        : value.type == 'bool'
-          ? new UniformBool(location!, value.value)
-          : new Uniform1i(location!, value.value)
-
+    let uniform: UniformTypeMap[T['type']]['instance']
+    switch (tv.type) {
+      case '1i':
+        uniform = new Uniform1i(location!, tv.value) as Uniform1i
+        break
+      case '2f':
+        uniform = new Uniform2f(location!, tv.value) as Uniform2f
+        break
+      case '3f':
+        uniform = new Uniform3f(location!, tv.value) as Uniform3f
+        break
+      case 'bool':
+        uniform = new UniformBool(location!, tv.value) as UniformBool
+        break
+      default: {
+        throw new Error(`Unknown uniform type: ${tv}`)
+      }
+    }
     this._uniforms.set(name, uniform)
     return uniform
   }

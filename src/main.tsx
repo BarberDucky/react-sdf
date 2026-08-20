@@ -5,7 +5,7 @@ import { FlatShapeListEntry, ShapeController } from './model/shape-controller'
 import MouseMovementManager from './mouse-movement-manager'
 import './style.css'
 import Ui from './ui/ui'
-import { Uniform1i, Uniform2f, Uniform3f, UniformBool, WebGlContext } from './webgl/webgl-context'
+import { WebGlContext } from './webgl/webgl-context.ts'
 
 import { createRoot } from 'react-dom/client'
 import { Store } from './store'
@@ -104,12 +104,12 @@ mouseMovementManager.addWheelCallback(deltaWheel => {
   camera.zoom(deltaWheel)
 })
 
-const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }) as Uniform2f
-const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }) as Uniform3f
-const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }) as Uniform3f
-const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }) as UniformBool
-const uTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT }) as Uniform1i
-const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }) as Uniform1i
+const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } })
+const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } })
+const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } })
+const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled })
+const uTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT })
+const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length })
 
 const listTex = webGlContext.createDataTexture()
 
@@ -118,11 +118,11 @@ const animate = () => {
   resizeCanvasToDisplaySize(canvas)
   webGlContext.resizeViewport(canvas.width, canvas.height)
 
-  uResolution.updateValue({ x: canvas.width, y: canvas.height })
-  uCameraOrigin.updateValue({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
-  uLookAt.updateValue({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
-  uIsGizmoEnabled.updateValue(store.getState().isGizmoEnabled)
-  uShapeCount.updateValue(shapeController.flatShapeList.length)
+  uResolution.value = ({ x: canvas.width, y: canvas.height })
+  uCameraOrigin.value = ({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
+  uLookAt.value = ({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
+  uIsGizmoEnabled.value = (store.getState().isGizmoEnabled)
+  uShapeCount.value = (shapeController.flatShapeList.length)
 
   const listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
   webGlContext.setDataTexture(listTex, listData, TEXEL_COUNT * shapeController.flatShapeList.length, 1)

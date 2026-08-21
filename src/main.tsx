@@ -125,14 +125,23 @@ mouseMovementManager.addWheelCallback(deltaWheel => {
   camera.zoom(deltaWheel)
 })
 
-const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } })
-const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } })
-const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } })
-const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled })
-const uTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT })
-const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length })
+const uResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }, webGlContext._sceneProgram)
+const uCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }, webGlContext._sceneProgram)
+const uLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }, webGlContext._sceneProgram)
+const uIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }, webGlContext._sceneProgram)
+const uTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT }, webGlContext._sceneProgram)
+const uShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }, webGlContext._sceneProgram)
 
-const listTex = webGlContext.createDataTexture()
+const uMaskResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }, webGlContext._maskProgram)
+const uMaskCameraOrigin = webGlContext.registerUniform('iCameraOrigin', { type: '3f', value: { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z } }, webGlContext._maskProgram)
+const uMaskLookAt = webGlContext.registerUniform('iLookAt', { type: '3f', value: { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z } }, webGlContext._maskProgram)
+const uMaskIsGizmoEnabled = webGlContext.registerUniform('iIsGizmoEnabled', { type: 'bool', value: store.getState().isGizmoEnabled }, webGlContext._maskProgram)
+const uMaskTexelCount = webGlContext.registerUniform('iTexelCount', { type: '1i', value: TEXEL_COUNT }, webGlContext._maskProgram)
+const uMaskShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i', value: shapeController.flatShapeList.length }, webGlContext._maskProgram)
+
+const uHighlightResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }, webGlContext._highlightProgram)
+
+const listTex = webGlContext.createDataTexture('iShapeDataTexture')
 
 const animate = () => {
 
@@ -144,6 +153,14 @@ const animate = () => {
   uLookAt.value = ({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
   uIsGizmoEnabled.value = (store.getState().isGizmoEnabled)
   uShapeCount.value = (shapeController.flatShapeList.length)
+
+  uMaskResolution.value = ({ x: canvas.width, y: canvas.height })
+  uMaskCameraOrigin.value = ({ x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z })
+  uMaskLookAt.value = ({ x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z })
+  uMaskIsGizmoEnabled.value = (store.getState().isGizmoEnabled)
+  uMaskShapeCount.value = (shapeController.flatShapeList.length)
+
+  uHighlightResolution.value = ({ x: canvas.width, y: canvas.height })
 
   const listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
   webGlContext.setDataTexture(listTex, listData, TEXEL_COUNT * shapeController.flatShapeList.length, 1)

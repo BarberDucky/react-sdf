@@ -11,7 +11,7 @@ uniform int iTexelCount;
 
 uniform int iShapeCount;
 
-uniform sampler2D iSampler1;
+uniform sampler2D iShapeDataTexture;
 
 struct MaterialDist {
   vec3 color;
@@ -126,10 +126,10 @@ float intersectList(vec3 p) {
   float shapeDist = 1000.;
 
   for (int i = 0; i < iShapeCount; i++) {
-    vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
-    vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
-    vec4 rotationScale = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0);
-    vec3 operationRound = texelFetch(iSampler1, ivec2(4 + i * iTexelCount, 0), 0).xyz;
+    vec4 typeExtra = texelFetch(iShapeDataTexture, ivec2(0 + i * iTexelCount, 0), 0);
+    vec3 position = texelFetch(iShapeDataTexture, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+    vec4 rotationScale = texelFetch(iShapeDataTexture, ivec2(3 + i * iTexelCount, 0), 0);
+    vec3 operationRound = texelFetch(iShapeDataTexture, ivec2(4 + i * iTexelCount, 0), 0).xyz;
 
     if (typeExtra.x < 0.5) {
       // skip group
@@ -193,8 +193,8 @@ float intersectTree(vec3 p) {
   float stack[12];
 
   for (int i = 0; i < iShapeCount; i++) {
-    vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
-    vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+    vec4 typeExtra = texelFetch(iShapeDataTexture, ivec2(0 + i * iTexelCount, 0), 0);
+    vec3 position = texelFetch(iShapeDataTexture, ivec2(1 + i * iTexelCount, 0), 0).xyz;
 
     if (typeExtra.x < 0.5) {
 
@@ -278,11 +278,11 @@ MaterialDist shadeList(vec3 p) {
   MaterialDist m;
 
   for (int i = 0; i < iShapeCount; i++) {
-    vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
-    vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
-    vec3 color = texelFetch(iSampler1, ivec2(2 + i * iTexelCount, 0), 0).rgb;
-    vec4 rotationScale = texelFetch(iSampler1, ivec2(3 + i * iTexelCount, 0), 0).xyzw;
-    vec3 operationRound = texelFetch(iSampler1, ivec2(4 + i * iTexelCount, 0), 0).xyz;
+    vec4 typeExtra = texelFetch(iShapeDataTexture, ivec2(0 + i * iTexelCount, 0), 0);
+    vec3 position = texelFetch(iShapeDataTexture, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+    vec3 color = texelFetch(iShapeDataTexture, ivec2(2 + i * iTexelCount, 0), 0).rgb;
+    vec4 rotationScale = texelFetch(iShapeDataTexture, ivec2(3 + i * iTexelCount, 0), 0).xyzw;
+    vec3 operationRound = texelFetch(iShapeDataTexture, ivec2(4 + i * iTexelCount, 0), 0).xyz;
 
     if (typeExtra.x < 0.5) {
 
@@ -373,9 +373,9 @@ MaterialDist shadeTree(vec3 p) {
   MaterialDist stack[12];
 
   for (int i = 0; i < iShapeCount; i++) {
-    vec4 typeExtra = texelFetch(iSampler1, ivec2(0 + i * iTexelCount, 0), 0);
-    vec3 position = texelFetch(iSampler1, ivec2(1 + i * iTexelCount, 0), 0).xyz;
-    vec3 color = texelFetch(iSampler1, ivec2(2 + i * iTexelCount, 0), 0).rgb;
+    vec4 typeExtra = texelFetch(iShapeDataTexture, ivec2(0 + i * iTexelCount, 0), 0);
+    vec3 position = texelFetch(iShapeDataTexture, ivec2(1 + i * iTexelCount, 0), 0).xyz;
+    vec3 color = texelFetch(iShapeDataTexture, ivec2(2 + i * iTexelCount, 0), 0).rgb;
 
     if (typeExtra.x < 0.5) {
 

@@ -3,6 +3,10 @@ export function createContext(canvas: HTMLCanvasElement) {
   if (gl == null) {
     throw new Error(`Supplied canvas doesn't support WebGL2`)
   }
+
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
   return gl
 }
 

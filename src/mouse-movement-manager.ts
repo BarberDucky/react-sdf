@@ -1,14 +1,21 @@
 import { Point2 } from './utils'
 
+export enum MouseDragEvent {
+  Start,
+  Move,
+  End,
+}
+
 export default class MouseMovementManager {
 
   private targetElement: HTMLElement
 
   private isDragging = false
-  private dragStart: Point2 | null = null
-  private clickStart: Point2 | null = null
+  private dragStarted = false
+  private dragOrigin: Point2 | null = null
+  private clickOrigin: Point2 | null = null
 
-  private moveCallbacks: Array<(deltaMove: Point2) => void> = []
+  private moveCallbacks: Array<(origin: Point2, current: Point2, deltaMove: Point2, eventType: MouseDragEvent) => void> = []
   private wheelCallbacks: Array<(deltaWheel: number) => void> = []
   private clickCallbacks: Array<(position: Point2) => void> = []
 
@@ -17,40 +24,59 @@ export default class MouseMovementManager {
 
     this.targetElement.addEventListener('pointerdown', e => {
       this.isDragging = true
-      this.dragStart = { x: e.clientX, y: e.clientY }
-      this.clickStart = { x: e.clientX, y: e.clientY }
+      this.dragOrigin = { x: e.clientX, y: e.clientY }
+      this.clickOrigin = { x: e.clientX, y: e.clientY }
     })
 
     this.targetElement.addEventListener('pointerup', e => {
-      if (this.clickStart != null) {
+      if (this.clickOrigin != null && this.isDragging && this.dragOrigin != null) {
         const distance = Math.sqrt(
-          Math.pow(this.clickStart.x - e.clientX, 2) +
-          Math.pow(this.clickStart.y - e.clientY, 2),
+          Math.pow(this.clickOrigin.x - e.clientX, 2) +
+          Math.pow(this.clickOrigin.y - e.clientY, 2),
         )
 
         if (distance < 1) {
           for (const fn of this.clickCallbacks) {
-            fn(this.clickStart)
+            fn(this.clickOrigin)
+          }
+        } else {
+          const origin = this.clickOrigin!
+          const delta = {
+            x: this.dragOrigin.x - e.clientX,
+            y: e.clientY - this.dragOrigin.y,
+          }
+
+          this.dragOrigin = { x: e.clientX, y: e.clientY }
+
+          for (const fn of this.moveCallbacks) {
+            fn(origin, this.dragOrigin, delta, MouseDragEvent.End)
+            this.dragStarted = false
           }
         }
       }
 
       this.isDragging = false
-      this.dragStart = null
-      this.clickStart = null
+      this.dragOrigin = null
+      this.clickOrigin = null
     })
 
     this.targetElement.addEventListener('pointermove', e => {
-      if (this.isDragging && this.dragStart != null) {
+      if (this.isDragging && this.dragOrigin != null) {
+        const origin = this.clickOrigin!
         const delta = {
-          x: this.dragStart.x - e.clientX,
-          y: e.clientY - this.dragStart.y,
+          x: this.dragOrigin.x - e.clientX,
+          y: e.clientY - this.dragOrigin.y,
         }
 
-        this.dragStart = { x: e.clientX, y: e.clientY }
+        this.dragOrigin = { x: e.clientX, y: e.clientY }
 
         for (const fn of this.moveCallbacks) {
-          fn(delta)
+          if (this.dragStarted) {
+            fn(origin, this.dragOrigin, delta, MouseDragEvent.Move)
+          } else {
+            fn(origin, this.dragOrigin, delta, MouseDragEvent.Start)
+            this.dragStarted = true
+          }
         }
       }
     })
@@ -70,7 +96,7 @@ export default class MouseMovementManager {
     })
   }
 
-  public addMoveCallback(fn: (deltaMove: Point2) => void) {
+  public addMoveCallback(fn: (origin: Point2, current: Point2, deltaMove: Point2, eventType: MouseDragEvent) => void) {
     this.moveCallbacks.push(fn)
   }
 

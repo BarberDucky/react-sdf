@@ -2,7 +2,7 @@ import { Camera } from './camera'
 import { initializeCanvas, resizeCanvasToDisplaySize } from './canvas/canvas-utils'
 import KeyboardMovementManager from './keyboard-movement-manager'
 import { FlatShapeListEntry, ShapeController } from './model/shape-controller'
-import MouseMovementManager from './mouse-movement-manager'
+import MouseMovementManager, { MouseDragEvent } from './mouse-movement-manager'
 import './style.css'
 import Ui from './ui/ui'
 import { WebGlContext } from './webgl/webgl-context.ts'
@@ -11,7 +11,7 @@ import { createRoot } from 'react-dom/client'
 import { Store } from './store'
 import { generateListShaderTextures } from './renderers/generate-data-textures.ts'
 import { TEXEL_COUNT } from './renderers/consts.ts'
-import { getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
+import { getNewPosition, getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
 import { Box, Sphere } from './model/shapes.ts'
 
 const shapeController = new ShapeController()
@@ -111,7 +111,41 @@ mouseMovementManager.addClickCallback(p => {
   })
 })
 
-mouseMovementManager.addMoveCallback(deltaMove => {
+let movingShape: string | null = null
+
+mouseMovementManager.addMoveCallback((origin, current, deltaMove, eventType) => {
+
+  if (eventType == MouseDragEvent.Start) {
+    movingShape = getShapeAtPoint(
+      origin,
+      { x: canvas.width, y: canvas.height },
+      { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+      { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+      shapeController.flatShapeList,
+    )
+  }
+
+  if (eventType == MouseDragEvent.End) {
+    movingShape = null
+
+  }
+
+  if (movingShape != null && movingShape == store.getState().selectedExistingShape) {
+    const selectedShape = shapeController.getShapeById(movingShape)
+    if (selectedShape instanceof Sphere || selectedShape instanceof Box) {
+      const newPos = getNewPosition(
+        current,
+        selectedShape.position,
+        { x: canvas.width, y: canvas.height },
+        { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+        { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+      )
+
+      selectedShape.position = newPos
+    }
+    return
+  }
+
   if (!keyboardMovementManager.getIsShiftPressed()) {
     camera.orbit(-deltaMove.x, -deltaMove.y)
   }

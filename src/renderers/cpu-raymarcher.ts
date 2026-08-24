@@ -2,7 +2,7 @@ import { Point2, Point3 } from '../utils.ts'
 import { FlatShapeListEntry } from '../model/shape-controller.ts'
 import { Group } from '../model/shape-tree.ts'
 import { Box, Sphere } from '../model/shapes.ts'
-import { rotateXYZ, vector3Normalize } from '../vector3.ts'
+import { rotateXYZ, vector3Dot, vector3Normalize, vector3Subtract } from '../vector3.ts'
 import { doOperation, opRound, sdBox, sdSphere, setCamera } from './cpu-sdf-utils.ts'
 
 export function normalizeMouseCoordinates(x: number, y: number, canvas: HTMLCanvasElement) {
@@ -135,4 +135,29 @@ export function getShapeAtPoint(point: Point2, resolution: Point2, cameraOrigin:
   }
 
   return mapShapes(p, shapes).shapeId
+}
+
+export function getNewPosition (mouse: Point2, planePoint: Point3, resolution: Point2, cameraOrigin: Point3, lookAtNormal: Point3) {
+  const uv = {
+    x: (mouse.x * 2 - resolution.x) / resolution.y,
+    y: -1 * (mouse.y * 2 - resolution.y) / resolution.y,
+  }
+
+  const camera = setCamera(lookAtNormal, cameraOrigin)
+  const rd = vector3Normalize(camera.multiplyPoint({
+    x: uv.x * 0.5,
+    y: uv.y * 0.5,
+    z: 1,
+  }))
+
+  const normal = vector3Subtract(lookAtNormal, cameraOrigin)
+
+  const denom = vector3Dot(normal, rd)
+  const t = vector3Dot(normal, vector3Subtract(planePoint, cameraOrigin)) / denom
+
+  return {
+    x: cameraOrigin.x + rd.x * t,
+    y: cameraOrigin.y + rd.y * t,
+    z: cameraOrigin.z + rd.z * t,
+  }
 }

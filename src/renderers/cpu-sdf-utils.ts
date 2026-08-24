@@ -20,6 +20,9 @@ export function opRound(d: number, rad: number) {
 }
 
 export function doOperation(opData: Operation, d1: number, d2: number) {
+  // TODO: check if this is needed in the shader as well
+  if (d1 == d2) { return d1 }
+
   if (opData.type == 'union') {
     return opSmoothUnion(d1, d2, opData.smoothness ?? 0)
   } else if (opData.type == 'difference') {

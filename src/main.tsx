@@ -2,7 +2,7 @@ import { Camera } from './camera'
 import { initializeCanvas, resizeCanvasToDisplaySize } from './canvas/canvas-utils'
 import KeyboardMovementManager from './keyboard-movement-manager'
 import { FlatShapeListEntry, ShapeController } from './model/shape-controller'
-import MouseMovementManager from './mouse-movement-manager'
+import MouseMovementManager, { MouseDragEvent } from './mouse-movement-manager'
 import './style.css'
 import Ui from './ui/ui'
 import { WebGlContext } from './webgl/webgl-context.ts'
@@ -11,8 +11,10 @@ import { createRoot } from 'react-dom/client'
 import { Store } from './store'
 import { generateListShaderTextures } from './renderers/generate-data-textures.ts'
 import { TEXEL_COUNT } from './renderers/consts.ts'
-import { getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
+import { getNewPosition, getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
 import { Box, Sphere } from './model/shapes.ts'
+import { Point3 } from './utils.ts'
+import { vector3Add, vector3Subtract } from './vector3.ts'
 
 const shapeController = new ShapeController()
 const keyboardMovementManager = new KeyboardMovementManager()
@@ -111,7 +113,59 @@ mouseMovementManager.addClickCallback(p => {
   })
 })
 
-mouseMovementManager.addMoveCallback(deltaMove => {
+let movingShape: string | null = null
+let dragOffset: Point3 = { x: 0, y: 0, z: 0 }
+
+mouseMovementManager.addMoveCallback((origin, current, deltaMove, eventType) => {
+
+  if (eventType == MouseDragEvent.Start) {
+    movingShape = getShapeAtPoint(
+      origin,
+      { x: canvas.width, y: canvas.height },
+      { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+      { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+      shapeController.flatShapeList,
+    )
+
+    if (movingShape != null) {
+      const selectedShape = shapeController.getShapeById(movingShape)
+      if (selectedShape != null && selectedShape instanceof Sphere || selectedShape instanceof Box) {
+        const shapePos = selectedShape.position
+
+        const hitPosition = getNewPosition(
+          current,
+          selectedShape.position,
+          { x: canvas.width, y: canvas.height },
+          { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+          { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+        )
+
+        dragOffset = vector3Subtract(shapePos, hitPosition)
+      }
+    }
+  }
+
+  if (eventType == MouseDragEvent.End) {
+    movingShape = null
+    dragOffset = { x: 0, y: 0, z: 0 }
+  }
+
+  if (movingShape != null && movingShape == store.getState().selectedExistingShape) {
+    const selectedShape = shapeController.getShapeById(movingShape)
+    if (selectedShape instanceof Sphere || selectedShape instanceof Box) {
+      const newPos = getNewPosition(
+        current,
+        selectedShape.position,
+        { x: canvas.width, y: canvas.height },
+        { x: camera.getOrigin().x, y: camera.getOrigin().y, z: camera.getOrigin().z },
+        { x: camera.getTarget().x, y: camera.getTarget().y, z: camera.getTarget().z },
+      )
+
+      selectedShape.position = vector3Add(newPos, dragOffset)
+    }
+    return
+  }
+
   if (!keyboardMovementManager.getIsShiftPressed()) {
     camera.orbit(-deltaMove.x, -deltaMove.y)
   }

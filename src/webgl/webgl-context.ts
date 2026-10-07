@@ -1,10 +1,12 @@
 import { createContext, createProgram, createShader } from './helpers.ts'
-import { Uniform, Uniform1i, Uniform2f, Uniform3f, UniformBool, UniformTypeMap, UniformTypeValue } from './uniform.ts'
+import { Uniform, Uniform1i, Uniform2f, Uniform3f, UniformBool, UniformMatrix4fv, UniformTypeMap, UniformTypeValue } from './uniform.ts'
 
 import defaultVertexShader from '../renderers/shaders/default.vertex.glsl?raw'
 import sceneFragmentShader from '../renderers/shaders/scene.fragment.glsl?raw'
 import maskFragmentShader from '../renderers/shaders/selected-mask.fragment.glsl?raw'
 import highlightFragmentShader from '../renderers/shaders/selected-highlight.fragment.glsl?raw'
+import gizmoVertexShader from '../renderers/shaders/gizmo.vertex.glsl?raw'
+import gizmoFragmentShader from '../renderers/shaders/gizmo.fragment.glsl?raw'
 
 export class WebGlContext {
 
@@ -13,6 +15,7 @@ export class WebGlContext {
   public _sceneProgram: WebGLProgram
   public _maskProgram: WebGLProgram
   public _highlightProgram: WebGLProgram
+  public _gizmoProgram: WebGLProgram
 
   private _maxTextureCount = 4
 
@@ -33,13 +36,20 @@ export class WebGlContext {
     const _maskFragmentShader = createShader(this._gl, this._gl.FRAGMENT_SHADER, maskFragmentShader)
     const _highlightFragmentShader = createShader(this._gl, this._gl.FRAGMENT_SHADER, highlightFragmentShader)
 
+    const _gizmoVertexShader = createShader(this._gl, this._gl.VERTEX_SHADER, gizmoVertexShader)
+    const _gizmoFragmentShader = createShader(this._gl, this._gl.FRAGMENT_SHADER, gizmoFragmentShader)
+
     this._sceneProgram = createProgram(this._gl, _defaultVertexShader, _sceneFragmentShader)
     this._maskProgram = createProgram(this._gl, _defaultVertexShader, _maskFragmentShader)
     this._highlightProgram = createProgram(this._gl, _defaultVertexShader, _highlightFragmentShader)
+    this._gizmoProgram = createProgram(this._gl, _gizmoVertexShader, _gizmoFragmentShader)
 
     this._gl.deleteShader(_defaultVertexShader)
     this._gl.deleteShader(_sceneFragmentShader)
     this._gl.deleteShader(_maskFragmentShader)
+    this._gl.deleteShader(_highlightFragmentShader)
+    this._gl.deleteShader(_gizmoVertexShader)
+    this._gl.deleteShader(_gizmoFragmentShader)
 
     this._maskTexture = this.createMaskTexture()
     this._maskFbo = this.createMaskFbo()
@@ -88,10 +98,9 @@ export class WebGlContext {
 
   public requestDraw() {
     this.drawScene()
-
     this.drawOutlineMask()
-
     this.drawOutline()
+    this.drawGizmo()
   }
 
   public drawScene() {
@@ -170,6 +179,55 @@ export class WebGlContext {
     }
 
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6)
+  }
+
+  public drawGizmo() {
+    const uniforms = this._uniforms.get(this._gizmoProgram)
+
+    this._gl.useProgram(this._gizmoProgram)
+
+    if (uniforms != null) {
+      uniforms.forEach(uniform => uniform.accept(this._gl))
+    }
+
+    const gizmoPositionAttributeLocation = this._gl.getAttribLocation(this._gizmoProgram, 'a_position')
+    const gizmoColorAttributeLocation = this._gl.getAttribLocation(this._gizmoProgram, 'a_color')
+
+    const positionBuffer = this._gl.createBuffer()
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, positionBuffer)
+
+    const vertices: number[] = [0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, ]
+
+    const SEGMENTS = 0
+    const ANGLE = 2 * Math.PI / SEGMENTS
+    for (let i = 0; i < SEGMENTS; i++) {
+      vertices.push(
+        1 * Math.cos(i * ANGLE), 0, 1 * Math.sin(i * ANGLE),
+        0, 1, 0,
+        1 * Math.cos(((i + 1) % SEGMENTS) * ANGLE), 0, 1 * Math.sin(((i + 1) % SEGMENTS) * ANGLE)
+      )
+    }
+
+    // console.log(vertices)
+
+    this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(vertices), this._gl.STATIC_DRAW)
+
+    const vao = this._gl.createVertexArray()
+    this._gl.bindVertexArray(vao)
+
+    const size = 3
+    const type = this._gl.FLOAT
+    const normalize = false
+    const stride = 0
+    const offset = 0
+
+    this._gl.enableVertexAttribArray(gizmoPositionAttributeLocation)
+    this._gl.vertexAttribPointer(gizmoPositionAttributeLocation, size, type, normalize, stride, offset)
+
+    // this._gl.enableVertexAttribArray(gizmoColorAttributeLocation)
+    // this._gl.vertexAttribPointer(gizmoColorAttributeLocation, size, type, normalize, stride, offset)
+
+    this._gl.drawArrays(this._gl.TRIANGLES, 0, 3)
   }
 
   private createMaskTexture() {
@@ -262,6 +320,9 @@ export class WebGlContext {
         break
       case '3f':
         uniform = new Uniform3f(location!, tv.value) as Uniform3f
+        break
+      case 'mat4fv':
+        uniform = new UniformMatrix4fv(location!, tv.value) as UniformMatrix4fv
         break
       case 'bool':
         uniform = new UniformBool(location!, tv.value) as UniformBool

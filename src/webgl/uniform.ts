@@ -1,4 +1,4 @@
-import { Point2, Point3 } from '../utils.ts'
+import { Mat4, Point2, Point3 } from '../utils.ts'
 
 export abstract class Uniform<T> {
   constructor(
@@ -27,6 +27,12 @@ export class Uniform3f extends Uniform<Point3> {
   }
 }
 
+export class UniformMatrix4fv extends Uniform<Mat4> {
+  accept(gl: WebGL2RenderingContext) {
+    gl.uniformMatrix4fv(this.location, false, this.value.m)
+  }
+}
+
 export class UniformBool extends Uniform<boolean> {
   accept(gl: WebGL2RenderingContext) {
     gl.uniform1i(this.location, this.value ? 1 : 0)
@@ -37,6 +43,7 @@ export interface UniformTypeMap {
   '1i': { value: number; instance: Uniform1i }
   '2f': { value: Point2; instance: Uniform2f }
   '3f': { value: Point3; instance: Uniform3f }
+  'mat4fv': { value: Mat4, instance: UniformMatrix4fv }
   'bool': { value: boolean; instance: UniformBool }
 }
 

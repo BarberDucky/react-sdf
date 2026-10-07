@@ -98,3 +98,40 @@ export function dedent(strings: TemplateStringsArray, ...values: unknown[]): str
 
   return lines.join('\n')
 }
+
+export class Mat4 {
+
+  constructor(public m: number[]) {
+    if (m.length !== 16) {
+      throw new Error('Mat4 requires exactly 16 elements')
+    }
+  }
+
+  static identity(): Mat4 {
+    return new Mat4([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ])
+  }
+
+  // Multiply this matrix by another matrix: this * other
+  multiplyMatrix(other: Mat4): Mat4 {
+    const a = this.m
+    const b = other.m
+    const result = new Array(16).fill(0)
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        let sum = 0
+        for (let k = 0; k < 4; k++) {
+          sum += a[row * 4 + k] * b[k * 4 + col]
+        }
+        result[row * 4 + col] = sum
+      }
+    }
+
+    return new Mat4(result)
+  }
+}

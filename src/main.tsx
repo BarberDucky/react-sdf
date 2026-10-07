@@ -13,8 +13,8 @@ import { generateListShaderTextures } from './renderers/generate-data-textures.t
 import { TEXEL_COUNT } from './renderers/consts.ts'
 import { getNewPosition, getShapeAtPoint } from './renderers/cpu-raymarcher.ts'
 import { Box, Sphere } from './model/shapes.ts'
-import { Point3 } from './utils.ts'
-import { vector3Add, vector3Subtract } from './vector3.ts'
+import { Mat4, Point3 } from './utils.ts'
+import { vector3Add, vector3Cross, vector3Dot, vector3Normalize, vector3Subtract } from './vector3.ts'
 
 const shapeController = new ShapeController()
 const keyboardMovementManager = new KeyboardMovementManager()
@@ -195,6 +195,8 @@ const uMaskShapeCount = webGlContext.registerUniform('iShapeCount', { type: '1i'
 
 const uHighlightResolution = webGlContext.registerUniform('iResolution', { type: '2f', value: { x: canvas.width, y: canvas.height } }, webGlContext._highlightProgram)
 
+const aGizmoTransform = webGlContext.registerUniform('iGizmoTransform', { type: 'mat4fv', value: Mat4.identity() }, webGlContext._gizmoProgram)
+
 const listTex = webGlContext.createDataTexture('iShapeDataTexture')
 
 const animate = () => {
@@ -218,6 +220,35 @@ const animate = () => {
 
   const listData = generateListShaderTextures(shapeController.rootOperation, shapeController.flatShapeList.length)
   webGlContext.setDataTexture(listTex, listData, TEXEL_COUNT * shapeController.flatShapeList.length, 1)
+
+  const near = 0
+  const far = 100
+  const aspect = canvas.width / canvas.height
+  const fovy = 1
+
+  const f = 1 / Math.tan(fovy / 2)
+  const nf = 1 / (near - far)
+
+  const projection = new Mat4([
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (far + near) * nf, -1,
+    0, 0, 2 * far * near * nf, 0,
+  ])
+
+  const up = { x: 0, y: 1, z: 0 }
+  const forward = vector3Normalize(vector3Subtract(camera.getTarget(), camera.getOrigin()))
+  const right = vector3Normalize(vector3Cross(forward, up))
+  const camUp = vector3Cross(right, forward)
+
+  const view = new Mat4([
+    right.x,   camUp.x,   -forward.x,  0,
+    right.y,   camUp.y,   -forward.y,  0,
+    right.z,   camUp.z,   -forward.z,  0,
+    -vector3Dot(right, camera.getOrigin()), -vector3Dot(camUp, camera.getOrigin()), vector3Dot(forward, camera.getOrigin()), 1
+  ])
+
+  aGizmoTransform.value = view.multiplyMatrix(projection)
 
   webGlContext.requestDraw()
   window.requestAnimationFrame(animate)
